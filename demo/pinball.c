@@ -82,7 +82,16 @@ int main(){
 
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
-        total_time += dt;
+  	total_time += dt;
+	if (total_time > 1){
+                swinger_add_momentum(s1, 20);
+                swinger_add_momentum(s2, -20);
+                printf("ADDING MOMENTUM\n");
+		total_time = 0;
+        }
+        printf("TORQUE: %f\n", swinger_get_torque(s1));
+        printf("MOMENTUM: %f\n", swinger_get_momentum(s2));
+
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);
         scene_tick(scene, dt);
