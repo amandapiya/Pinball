@@ -313,7 +313,9 @@ void make_bumpers(scene_t *scene){
     create_physics_collision(scene, BUMPER_COLLISION, ball, gain_life);
     create_collision(scene, ball, gain_life, (collision_handler_t) extra_life, scene, NULL);
 
-    body_t *rotating_star = make_star(5, bumper_radius, BLACK);
+    body_t *rotating_star = make_star(8, 40, BLACK);
+    body_set_rotation(rotating_star, .1);
+    body_set_velocity(rotating_star, (vector_t){15, 0});
     body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top + 1.1 * WALL_HEIGHT.y});
     scene_add_body(scene, rotating_star);
     create_physics_collision(scene, BUMPER_COLLISION, ball, rotating_star);
