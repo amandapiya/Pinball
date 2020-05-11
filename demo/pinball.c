@@ -176,7 +176,7 @@ void make_pinball_border(scene_t *scene){
     for (size_t i = 0; i < list_size(pinball_border); i++){
         body_t *b = list_get(pinball_border, i);
         scene_add_body(scene, b);
-        create_physics_collision(scene, .8, ball, b);
+        create_physics_collision(scene, .5, ball, b);
     }
 }
 
@@ -290,7 +290,7 @@ void reset_game(scene_t *scene){
     body_set_centroid(spring, spring_start_pos);
     scene_add_body(scene, spring);
 
-    create_physics_collision(scene, 1.0, ball, spring);
+    create_physics_collision(scene, 1.5, ball, spring);
 
     // add accelerators
     body_t *acc1 = make_accelerator(50, 20, (vector_t){500, 200}, (rgb_color_t) {1.0, 0, 1});
@@ -328,12 +328,12 @@ int main(){
         double dt = time_since_last_tick();
         total_time += dt;
         
-        if (polygon_centroid(body_get_shape(ball)).y > 400){
+        if (polygon_centroid(body_get_shape(ball)).y > 445){
             hit_wall = true;
         }
 
         if (hit_wall == true){
-            body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 5});
+            body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 10});
         }
 
         temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
@@ -349,7 +349,6 @@ int main(){
 
         // check if life lost
         if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2 - BALL_ERROR){
-            body_free(ball);
             printf("GAME OVER\n");
             break; // REPLACE LATER
         }
