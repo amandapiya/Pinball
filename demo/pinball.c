@@ -87,7 +87,7 @@ const double SWINGER_LENGTH = 110;
 const double LEFT_SWINGER_ANG = 11*M_PI/6;
 const double RIGHT_SWINGER_ANG = 7*M_PI/6;
 const rgb_color_t SWINGER_COLOR = {1, 0, 0};
-
+const double BASE_MOMENTUM = 5; // ADJUSTABLE
 const double ACC_WIDTH = 70;
 const double ACC_HEIGHT = 20;
 const double ACC_POS_Y = 250;
@@ -434,13 +434,13 @@ void spring_fling(void *key_handler_aux){
 
 void left_swinger(double held_time, void *key_handler_aux){
     swinger_t *s = key_aux_get_swinger1(key_handler_aux);
-    double momentum = held_time * MOMENTUM_CONSTANT;
+    double momentum = BASE_MOMENTUM +  held_time * MOMENTUM_CONSTANT;
     swinger_add_momentum(s, momentum);
 }
 
 void right_swinger(double held_time, void *key_handler_aux){
         swinger_t *s2 = key_aux_get_swinger2(key_handler_aux);
-        double momentum2 = -1 * held_time * MOMENTUM_CONSTANT;
+        double momentum2 = -1 * BASE_MOMENTUM +  -1 * held_time * MOMENTUM_CONSTANT;
         swinger_add_momentum(s2, momentum2);
 }
 
@@ -542,10 +542,13 @@ void check_accelerator(scene_t *scene, body_t *ball, double total_time){
     }
 
     // accelerate ball if it is in accelerator region
+    if (body_get_velocity(ball).y > 0){
     vector_t c = polygon_centroid(body_get_shape(ball));
-    if ((c.x < MID_X - ACC_WIDTH || c.x < MID_X + ACC_WIDTH)
-    && (c.y < ACC_POS_Y - ACC_HEIGHT || c.y < ACC_POS_Y + 5 * ACC_HEIGHT)){
+    
+    if ((c.x > MID_X - ACC_WIDTH && c.x < MID_X + ACC_WIDTH)
+    && (c.y > ACC_POS_Y - ACC_HEIGHT && c.y < ACC_POS_Y + 5 * ACC_HEIGHT)){
         body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y + 35});
+    }
     }
 }
 

@@ -14,8 +14,9 @@
 const double TOO_CLOSE_GRAV = 5.0;
 const float COLOR_UPDATE = 0.1;
 // number of times find collision must return false before another collision with a wall can occur
-const double COLLISION_TRACKER = 1.0;
-const double SWINGER_COLLISION_TRACKER = 3;
+const int COLLISION_TRACKER = 5;
+const int SWINGER_COLLISION_TRACKER = 3;
+const double SWINGER_IMPULSE = 10; // ADJUSTABLE
 const double SWINGER_IMPULSE_MULTIPLIER = 0.7;
 
 void gravity_force(aux_t *aux){
@@ -141,7 +142,7 @@ void temp_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinge
         *counter += SWINGER_COLLISION_TRACKER;
         double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
         double swinger_dot = (vec_dot((vector_t){swinger_get_momentum(swinger), swinger_get_momentum(swinger)}, c_info->axis));
-        double impulse = ((1 + elasticity) * (swinger_dot - player_dot));
+        double impulse = SWINGER_IMPULSE + ((1 + elasticity) * (swinger_dot - player_dot));
         body_add_impulse(ball, vec_multiply(SWINGER_IMPULSE_MULTIPLIER * impulse, c_info->axis));
     }
     else if (*counter > 0){
