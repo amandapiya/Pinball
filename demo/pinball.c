@@ -306,8 +306,8 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
-        create_swinger_collision(scene, 1.0, s1, ball);
-        create_swinger_collision(scene, 1.0, s2, ball);
+        create_swinger_collision(scene, 2.0, s1, ball);
+        create_swinger_collision(scene, 2.0, s2, ball);
         if (total_time > 1){
             //swinger_add_momentum(s1, 20);
             //swinger_add_momentum(s2, -20);

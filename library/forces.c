@@ -133,7 +133,7 @@ void create_swinger_collision(scene_t *scene, double elasticity, swinger_t *swin
         printf("COLLISION\n");
         double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
         double swinger_dot = swinger_get_torque(swinger) * 1; // maybe change value
-        double impulse = body_get_mass(ball) * (1 + elasticity) * (player_dot - swinger_dot); // last term..
+        double impulse = (-1) * body_get_mass(ball) * (elasticity) * 10; // (player_dot - swinger_dot); // last term..
         body_add_impulse(ball, vec_multiply(impulse, c_info->axis));
     }
 }
