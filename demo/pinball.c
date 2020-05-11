@@ -227,13 +227,13 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
     if (type == KEY_PRESSED){
         switch (key) {
             case (LEFT_ARROW):
-                printf("LEFT\n");
+		printf(""); // idk why it doesnt compile if there are no print statements
                 swinger_t *s = key_aux_get_swinger1(key_handler_aux);
                 double momentum = held_time * MOMENTUM_CONSTANT;
                 swinger_add_momentum(s, momentum);
                 break;
             case (RIGHT_ARROW):
-                printf("RIGHT\n");
+		printf("");
                 swinger_t *s2 = key_aux_get_swinger2(key_handler_aux);
                 double momentum2 = -1 * held_time * MOMENTUM_CONSTANT;
                 swinger_add_momentum(s2, momentum2);
@@ -306,14 +306,14 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
+	swinger_tick(s1, dt);
+        swinger_tick(s2, dt);
+
         temp_swinger_collision(scene, 2.0, s1, ball);
         temp_swinger_collision(scene, 2.0, s2, ball);
         if (total_time > 1){
             total_time = 0;
         }
-
-        swinger_tick(s1, dt);
-        swinger_tick(s2, dt);
         scene_tick(scene, dt);
         spring_bounds(scene);
         sdl_render_scene(scene, swingers);
