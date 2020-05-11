@@ -167,7 +167,7 @@ void make_pinball_border(scene_t *scene){
     for (size_t i = 0; i < list_size(pinball_border); i++){
         body_t *b = list_get(pinball_border, i);
         scene_add_body(scene, b);
-        create_physics_collision(scene, 1, ball, b);
+        create_physics_collision(scene, .8, ball, b);
     }
 }
 
@@ -193,7 +193,7 @@ void spring_bounds(scene_t *scene){
             scene_add_body(scene, grav);
             create_newtonian_gravity(scene, G, ball, grav);
 
-//            body_set_velocity(ball, (vector_t) {0.0, -15.0});
+            //body_set_velocity(ball, (vector_t) {0.0, -3.0});
         }
         else if (added_grav == true){
             vector_t temp_v = body_get_velocity(ball);
@@ -310,12 +310,15 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
-	    swinger_tick(s1, dt);
-        swinger_tick(s2, dt);
+	//swinger_tick(s1, dt);
+        //swinger_tick(s2, dt);
 
         temp_swinger_collision(scene, 2.0, s1, ball, sw1counter);
         temp_swinger_collision(scene, 2.0, s2, ball, sw2counter);
-        if (total_time > 1){
+        swinger_tick(s1, dt);
+        swinger_tick(s2, dt);
+
+       	if (total_time > 1){
             total_time = 0;
         }
         scene_tick(scene, dt);

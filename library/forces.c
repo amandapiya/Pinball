@@ -137,18 +137,21 @@ void temp_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinge
     //if (testc->collided == true){
        //  printf("triangle collision\n");}
     //
+    //printf("c: %i\n", *counter);
     collision_info_t *c_info = find_collision(body_get_shape(ball), swinger_get_shape(swinger)); // maybe switch order
     if (c_info->collided == true && *counter == 0){
         // printf("COLLISION\n");
         *counter += 3; // update collision tracker
-        printf("x: %f, y: %f\n", c_info->axis.x, c_info->axis.y);
+       // printf("x: %f, y: %f\n", c_info->axis.x, c_info->axis.y);
         double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
-        double swinger_dot = vec_dot((vector_t){swinger_get_momentum(swinger), swinger_get_momentum(swinger)}, c_info->axis); // maybe change value
-        double impulse = .5 *  (1 + elasticity) * (swinger_dot - player_dot);// last term..
-        body_add_impulse(ball, vec_multiply(impulse, c_info->axis));
+        double swinger_dot = (vec_dot((vector_t){swinger_get_momentum(swinger), swinger_get_momentum(swinger)}, c_info->axis)); // maybe change value
+        double impulse = ((1 + elasticity) * (swinger_dot - player_dot));// last term..
+        body_add_impulse(ball, vec_multiply(0.7 * impulse, c_info->axis));
     }
     else {
-        *counter -= 3;
+	if (*counter > 0){
+        	*counter -= 1;
+	}
     }
     //free(testc);
     free(c_info);
