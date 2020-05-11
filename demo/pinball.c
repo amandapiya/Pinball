@@ -301,6 +301,9 @@ int main(){
         //printf("TORQUE: %f\n", swinger_get_torque(s1));
         //printf("MOMENTUM: %f\n", swinger_get_momentum(s2));
 
+	vector_t temp_v = body_get_velocity(scene_get_body(scene, 0));
+	temp_v.y -= 1;
+	body_set_velocity(scene_get_body(scene, 0), temp_v);
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);
         scene_tick(scene, dt);
