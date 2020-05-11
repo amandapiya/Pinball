@@ -51,7 +51,7 @@ const vector_t ALLEY_POINT = {900 - 3 + 50/2, MAX_Y/2 - 600/2 + 250/2};
 const vector_t WALL_HEIGHT = {245, 260};
 const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
-const rgb_color_t BALL_COLOR  = {0.50, 0, 0.50};
+const rgb_color_t BALL_COLOR  = {1, 0, 1};
 const double BALL_ERROR = 30;
 
 const double BALL_HEIGHT = 65.0;
@@ -357,7 +357,7 @@ int main(){
         spring_bounds(scene);
 
         // check if life lost
-        if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2){ // - BALL_ERROR
+        if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2-5 - BALL_ERROR){ // - BALL_ERROR
             printf("GAME OVER\n");
             break; // REPLACE LATER
         }
