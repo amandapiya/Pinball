@@ -55,7 +55,7 @@ const double BALL_HEIGHT = 65.0;
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
-const double g = 9.8;
+const double g = 100; // CHANGED
 
 bool flung = false;
 bool added_grav = false;
@@ -264,7 +264,7 @@ void reset_game(scene_t *scene){
     added_grav = false;
 
     // add ball
-    double ball_mass = 5.0;
+    double ball_mass = 1.0;
     double ball_error = 30.0;
     body_t *ball = make_circle(ALLEY_SPEC.x / 2 - ball_error, 0, 2 * M_PI, 
         BALL_COLOR, ball_mass, 1.0);
