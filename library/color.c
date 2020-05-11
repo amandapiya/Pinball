@@ -51,6 +51,6 @@ rgb_color_t phase_yellow(rgb_color_t og_color, double time_passed){
 
 rgb_color_t phase_accelerator(rgb_color_t og_color, double time_passed){
     float new_rb = og_color.r;
-    new_rb -= 0.2 * fabs(sin(time_passed));
+    new_rb -= 0.4 * fabs(sin(time_passed));
     return (rgb_color_t){new_rb, og_color.g, new_rb};
 }
