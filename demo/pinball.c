@@ -60,8 +60,8 @@ int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
-    swinger_t *s1 = swinger_init((vector_t){300, 300}, M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
-    swinger_t *s2 = swinger_init((vector_t){600, 300}, 3*M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
+    swinger_t *s1 = swinger_init((vector_t){380, 150}, 11*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
+    swinger_t *s2 = swinger_init((vector_t){620, 150}, 7*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
     list_add(swingers, s1);
     list_add(swingers, s2);
     double total_time = 0.0;
