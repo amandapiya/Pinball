@@ -289,6 +289,15 @@ void reset_game(scene_t *scene){
     scene_add_body(scene, spring);
 
     create_physics_collision(scene, 1.0, ball, spring);
+
+    // add accelerators
+    body_t *acc1 = make_accelerator(50, 20, (vector_t){500, 200}, (rgb_color_t) {1.0, 0, 1});
+    body_set_centroid(acc1, (vector_t){0, 0});
+    scene_add_body(scene, acc1);
+    body_t *acc2 = make_accelerator(50, 20, (vector_t){500, 230}, (rgb_color_t) {.8, 0, .8});
+    scene_add_body(scene, acc2);
+    body_t *acc3 = make_accelerator(50, 20, (vector_t){500, 260}, (rgb_color_t) {.6, 0, .6});
+    scene_add_body(scene, acc3);
 }
 
 int main(){

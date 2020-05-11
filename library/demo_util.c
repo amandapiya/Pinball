@@ -127,7 +127,10 @@ body_t *make_star(size_t num_arms, size_t rad, vector_t center_V, rgb_color_t co
 }
 
 body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t color){
-    list_t *vertices = list_init(1, free);
+    body_aux_t *aux = malloc(sizeof(body_aux_t));
+    *aux = (body_aux_t){false, false, true};
+
+       	list_t *vertices = list_init(1, free);
     vector_t *v1 = malloc(sizeof(*v1));
     *v1 = (vector_t) {center.x, center.y};
     list_add(vertices, v1);
@@ -146,6 +149,6 @@ body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t
     vector_t *v6 = malloc(sizeof(*v5));
     *v6 = (vector_t) {center.x - rad, center.y - height};
     list_add(vertices, v6);
-    body_t *acc = body_init(vertices, 0, color); // maybe change mass
+    body_t *acc = body_init_with_info(vertices, 1, color, (void *)aux, free); // maybe change mass
     return acc;
 }
