@@ -29,18 +29,28 @@ const rgb_color_t INNER_COLOR = {1, 1, 1};
 const double RECT_WIDTH = 150;
 const double RECT_HEIGHT = 50;
 const vector_t BOX_INIT = {100, MAX_Y - RECT_HEIGHT*1.15};
+
 const double SPACING = (MAX_X - 100 - (3 * RECT_WIDTH))/1.68 + RECT_WIDTH;
 const double SPACING2 = 35;
 const double LINE = 12;
+const double SHIFT = 7;
+
 const double BOARD_WIDTH = 450;
 const double BOARD_HEIGHT = 600;
+
+const double CONE_SCALE = 5;
+const double CONE_WIDTH = 100;
+const double CONE_HEIGHT = 100;
+const vector_t CONE_POINT = {207, 80};
+
+
 
 const double ALLEY_WIDTH = 50;
 const double ALLEY_HEIGHT = 258;
 const vector_t ALLEY_POINT = {535, 200};
 
 
-const vector_t LOSING_POINT = {MAX_X/2 - SPACING2, 90};
+const vector_t LOSING_POINT = {330, 70};
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -90,7 +100,7 @@ void scene_setup(scene_t *scene){
     body_t *alley = make_box(ALLEY_WIDTH, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
     body_t *alley_inside = make_box(ALLEY_WIDTH - LINE, ALLEY_HEIGHT - LINE, INNER_COLOR, 2);
     body_set_centroid(alley, ALLEY_POINT);
-    body_set_centroid(alley_inside, ALLEY_POINT);
+    body_set_centroid(alley_inside, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + SHIFT});
     scene_add_body(scene, alley);
     scene_add_body(scene, alley_inside);
 
@@ -104,10 +114,16 @@ void scene_setup(scene_t *scene){
 
 
     // Sets up dome bottom
+    body_t *cone = make_trapezoid(0, BOX_COLOR, 1);
+    body_t *cone_inside = make_trapezoid(CONE_SCALE, INNER_COLOR, 2);
+    body_set_centroid(cone, CONE_POINT);
+    body_set_centroid(cone_inside, (vector_t) {CONE_POINT.x, CONE_POINT.y + SHIFT});
+    scene_add_body(scene, cone);
+    scene_add_body(scene, cone_inside);
 
 
     // Sets up losing area
-    body_t *losing_area = make_box(RECT_WIDTH, RECT_HEIGHT, BOX_COLOR, 1);
+    body_t *losing_area = make_box(RECT_WIDTH, RECT_HEIGHT/2, BOX_COLOR, 1);
     body_set_centroid(losing_area, LOSING_POINT);
     scene_add_body(scene, losing_area);
 }
