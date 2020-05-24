@@ -26,7 +26,8 @@ STUDENT_LIBS = vector list \
 	polygon body scene \
 	aux force_storage \
 	forces \
-	color 
+	color \
+	demo_pinball_util
 
 STUDENT_TESTS = $(subst .c,, $(subst tests/student/,,$(wildcard tests/student/*.c)))
 
@@ -36,7 +37,7 @@ STUDENT_TESTS = $(subst .c,, $(subst tests/student/,,$(wildcard tests/student/*.
 # and ".o" to the end of each value in STUDENT_LIBS.
 STUDENT_OBJS = $(addprefix out/,$(STUDENT_LIBS:=.o))
 # List of test suite executables, e.g. "bin/test_suite_vector"
-TEST_BINS = $(addprefix bin/,$(STUDENT_TESTS)) bin/test_suite_forces 
+# TEST_BINS = $(addprefix bin/,$(STUDENT_TESTS)) bin/test_suite_forces 
 # List of demo executables, i.e. "bin/bounce".
 DEMO_BINS = $(addprefix bin/,$(DEMOS))
 # All executables (the concatenation of TEST_BINS and DEMO_BINS)
@@ -71,7 +72,7 @@ out/demo-%.o: demo/%.c # or "demo"; in this case, add "demo-" to the .o filename
 # Builds the demos by linking the necessary .o files.
 # Unlike the out/%.o rule, this uses the LIBS flags and omits the -c flag,
 # since it is building a full executable.
-bin/%: out/demo-%.o out/sdl_wrapper.o out/demo_util.o out/demo_breakout_util.o $(STUDENT_OBJS)
+bin/%: out/demo-%.o out/sdl_wrapper.o out/demo_util.o out/demo_pinball_util.o $(STUDENT_OBJS)
 	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
 
 # Builds the test suite executables from the corresponding test .o file

@@ -7,8 +7,8 @@
 #include "sdl_wrapper.h"
 
 #define WINDOW_TITLE "CS 3"
-#define WINDOW_WIDTH 1000
-#define WINDOW_HEIGHT 500
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 800
 #define MS_PER_S 1e3
 
 /**
