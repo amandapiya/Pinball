@@ -33,15 +33,14 @@ body_t *make_box(double width, double height, rgb_color_t color, int player){
       half_shape.y  *= -1;
     }
     double mass = RECT_MASS;
-    body_aux_t *temp_aux = malloc(sizeof(body_aux_t));
+    body_aux_t *aux = malloc(sizeof(body_aux_t));
     if (player == 0){
-      *temp_aux = (body_aux_t){true, false, false};
+      *aux = (body_aux_t){true, false, false};
     }else if (player == 1){
-      *temp_aux = (body_aux_t){false, true, false};
+      *aux = (body_aux_t){false, true, false};
+      mass = INFINITY;
     }else{
-       *temp_aux = (body_aux_t) {true, true, true};
-       mass = INFINITY;
+      *aux = (body_aux_t) {true, true, true};
     }
-    //free half_shape
-    return body_init_with_info(rect, mass, color, temp_aux, free);
+    return body_init_with_info(rect, mass, color, aux, free);
 }

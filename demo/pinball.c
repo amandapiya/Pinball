@@ -28,15 +28,19 @@ const rgb_color_t BOX_COLOR = {0, 0, 0};
 const rgb_color_t INNER_COLOR = {1, 1, 1};
 const double RECT_WIDTH = 150;
 const double RECT_HEIGHT = 50;
-const vector_t BOX_INIT = {100, MAX_Y - RECT_HEIGHT*1.25};
+const vector_t BOX_INIT = {100, MAX_Y - RECT_HEIGHT*1.15};
 const double SPACING = (MAX_X - 100 - (3 * RECT_WIDTH))/1.68 + RECT_WIDTH;
 const double SPACING2 = 35;
 const double LINE = 12;
 const double BOARD_WIDTH = 450;
 const double BOARD_HEIGHT = 600;
+
 const double ALLEY_WIDTH = 50;
 const double ALLEY_HEIGHT = 258;
 const vector_t ALLEY_POINT = {535, 200};
+
+
+const vector_t LOSING_POINT = {MAX_X/2 - SPACING2, 90};
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -66,43 +70,46 @@ void player_on_key(char key, key_event_type_t type, double held_time, void *scen
 void scene_setup(scene_t *scene){
     // Sets up top 3 boxes
     for (int i = 0; i < 3; i++){
-        body_aux_t *aux1 = malloc(sizeof(body_aux_t));
-        body_aux_t *aux2 = malloc(sizeof(body_aux_t));
-        *aux1 = (body_aux_t){false, false, false, -1};
-        *aux2 = (body_aux_t){false, false, false, -1};
         body_t *box = make_box(RECT_WIDTH, RECT_HEIGHT, BOX_COLOR, 2);
         body_t *inner_box = make_box(RECT_WIDTH - LINE, RECT_HEIGHT - LINE, INNER_COLOR, 2);
         body_set_centroid(box, (vector_t) {BOX_INIT.x + (SPACING * i), BOX_INIT.y});
         body_set_centroid(inner_box, (vector_t) {BOX_INIT.x + (SPACING * i), BOX_INIT.y});
-        body_set_info(box, aux1);
-        body_set_info(inner_box, aux2);
         scene_add_body(scene, box);
         scene_add_body(scene, inner_box);
     }
 
     // Sets up pinball border
-    body_aux_t *aux3 = malloc(sizeof(body_aux_t));
-    body_aux_t *aux4 = malloc(sizeof(body_aux_t));
-    *aux3 = (body_aux_t){false, false, false, -1};
-    *aux4 = (body_aux_t){false, false, false, -1};
     body_t *box2 = make_box(BOARD_WIDTH, BOARD_HEIGHT, BOX_COLOR, 2);
     body_t *inner_box2 = make_box(BOARD_WIDTH - LINE, BOARD_HEIGHT - LINE, INNER_COLOR, 2);
     body_set_centroid(box2, (vector_t) {MAX_X/2 - SPACING2, MAX_Y/2 - SPACING2});
     body_set_centroid(inner_box2, (vector_t) {MAX_X/2 - SPACING2, MAX_Y/2 - SPACING2});
-    body_set_info(box2, aux3);
-    body_set_info(inner_box2, aux4);
     scene_add_body(scene, box2);
     scene_add_body(scene, inner_box2);
 
     // Sets up ball alley
-    body_aux_t *aux5 = malloc(sizeof(body_aux_t));
-    *aux3 = (body_aux_t){false, true, false, -1};
     body_t *alley = make_box(ALLEY_WIDTH, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
+    body_t *alley_inside = make_box(ALLEY_WIDTH - LINE, ALLEY_HEIGHT - LINE, INNER_COLOR, 2);
     body_set_centroid(alley, ALLEY_POINT);
-    body_set_info(alley, aux5);
+    body_set_centroid(alley_inside, ALLEY_POINT);
     scene_add_body(scene, alley);
+    scene_add_body(scene, alley_inside);
+
+    // Sets up segueway
 
 
+    // Sets up dome top
+
+
+    // Sets up dome mid
+
+
+    // Sets up dome bottom
+
+
+    // Sets up losing area
+    body_t *losing_area = make_box(RECT_WIDTH, RECT_HEIGHT, BOX_COLOR, 1);
+    body_set_centroid(losing_area, LOSING_POINT);
+    scene_add_body(scene, losing_area);
 }
 
 void reset_game(scene_t *scene){
