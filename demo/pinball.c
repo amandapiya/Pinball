@@ -17,33 +17,31 @@
 #include "demo_pinball_util.h"
 
 #define WINDOW_TITLE "CS 3"
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 1300
+#define WINDOW_HEIGHT 650
 
 const double MIN_XY = 0;
-const double MAX_X = 800;
-const double MAX_Y = 800;
+const double MAX_X = 1300;
+const double MAX_Y = 650;
 const double TIME_DIVISION = 11;
 const rgb_color_t BOX_COLOR = {0, 0, 0};
 const rgb_color_t INNER_COLOR = {1, 1, 1};
 const double RECT_WIDTH = 150;
-const double RECT_HEIGHT = 50;
-const vector_t BOX_INIT = {100, MAX_Y - RECT_HEIGHT*1.15};
+const double RECT_HEIGHT = 90;
+const vector_t BOX_INIT = {MAX_X - RECT_WIDTH * 1.15, MAX_Y - RECT_HEIGHT * 1.15};
 
-const double SPACING = (MAX_X - 100 - (3 * RECT_WIDTH))/1.68 + RECT_WIDTH;
+const double SPACING = (MAX_Y - 50 - (4 * RECT_HEIGHT))/4;
 const double SPACING2 = 35;
 const double LINE = 12;
 const double SHIFT = 7;
 
-const double BOARD_WIDTH = 450;
+const double BOARD_WIDTH = 900;
 const double BOARD_HEIGHT = 600;
 
 const double CONE_SCALE = 5;
 const double CONE_WIDTH = 100;
 const double CONE_HEIGHT = 100;
 const vector_t CONE_POINT = {207, 80};
-
-
 
 const double ALLEY_WIDTH = 50;
 const double ALLEY_HEIGHT = 258;
@@ -78,12 +76,12 @@ void player_on_key(char key, key_event_type_t type, double held_time, void *scen
 }
 
 void scene_setup(scene_t *scene){
-    // Sets up top 3 boxes
-    for (int i = 0; i < 3; i++){
+    // Sets up 4 boxes
+    for (int i = 0; i < 4; i++){
         body_t *box = make_box(RECT_WIDTH, RECT_HEIGHT, BOX_COLOR, 2);
         body_t *inner_box = make_box(RECT_WIDTH - LINE, RECT_HEIGHT - LINE, INNER_COLOR, 2);
-        body_set_centroid(box, (vector_t) {BOX_INIT.x + (SPACING * i), BOX_INIT.y});
-        body_set_centroid(inner_box, (vector_t) {BOX_INIT.x + (SPACING * i), BOX_INIT.y});
+        body_set_centroid(box, (vector_t) {BOX_INIT.x, BOX_INIT.y - i * (SPACING + RECT_HEIGHT)});
+        body_set_centroid(inner_box, (vector_t) {BOX_INIT.x, BOX_INIT.y - i * (SPACING + RECT_HEIGHT)});
         scene_add_body(scene, box);
         scene_add_body(scene, inner_box);
     }
@@ -91,8 +89,8 @@ void scene_setup(scene_t *scene){
     // Sets up pinball border
     body_t *box2 = make_box(BOARD_WIDTH, BOARD_HEIGHT, BOX_COLOR, 2);
     body_t *inner_box2 = make_box(BOARD_WIDTH - LINE, BOARD_HEIGHT - LINE, INNER_COLOR, 2);
-    body_set_centroid(box2, (vector_t) {MAX_X/2 - SPACING2, MAX_Y/2 - SPACING2});
-    body_set_centroid(inner_box2, (vector_t) {MAX_X/2 - SPACING2, MAX_Y/2 - SPACING2});
+    body_set_centroid(box2, (vector_t) {(MAX_X - RECT_WIDTH - SPACING)/2, MAX_Y/2});
+    body_set_centroid(inner_box2, (vector_t) {(MAX_X - RECT_WIDTH - SPACING)/2, MAX_Y/2});
     scene_add_body(scene, box2);
     scene_add_body(scene, inner_box2);
 
