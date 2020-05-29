@@ -8,8 +8,10 @@
 #include "vector.h"
 #include "list.h"
 
-body_t *make_char(size_t rad, double min_rad, double max_rad, double scale1, double scale2);
+body_t *make_box(double width, double height, rgb_color_t color, int player);
 
-body_t *make_bullet(body_t *maker);
+body_t *make_trapezoid(double scale, rgb_color_t color, int player);
+
+list_t *circle_sector(size_t rad, double min_rad, double max_rad);
 
 #endif // #ifndef __DEMO_UTIL_H__

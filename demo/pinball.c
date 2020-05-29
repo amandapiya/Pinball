@@ -14,7 +14,7 @@
 #include "sdl_wrapper.h"
 #include "collision.h"
 #include "body.h"
-#include "demo_pinball_util.h"
+#include "demo_util.h"
 
 #define WINDOW_TITLE "CS 3"
 #define WINDOW_WIDTH 1300
