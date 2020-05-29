@@ -36,19 +36,18 @@ const double SPACING3 = 12;
 
 const double BOARD_WIDTH = 900;
 const double BOARD_HEIGHT = 600;
-const double BOARD_INIT_X = 100;
-const double BOARD_INIT_Y = MAX_Y/2;
+const vector_t BOARD_INIT = {100, MAX_Y/2};
 
-const double CONE_SCALE = 5;
-const double CONE_WIDTH = 100;
-const double CONE_HEIGHT = 100;
-const vector_t CONE_POINT = {207, 80};
+const double CONE_WIDTH = 150;
+const double CONE_HEIGHT = 200;
 
 const double ALLEY_WIDTH = 50;
-const double ALLEY_HEIGHT = 258;
-const vector_t ALLEY_POINT = {535, 200};
+const double ALLEY_HEIGHT = 250;
+const vector_t ALLEY_POINT = {BOARD_WIDTH - 3, MAX_Y/2 - BOARD_HEIGHT/2 + ALLEY_HEIGHT/2};
 
 
+const double LOSING_WIDTH = 250;
+const double LOSING_HEIGHT = 20;
 const vector_t LOSING_POINT = {330, 70};
 
 body_t *get_player(scene_t *scene){
@@ -92,22 +91,25 @@ void scene_setup(scene_t *scene){
     body_t *border2 = make_box(BOARD_WIDTH, SPACING2, BOX_COLOR, 1);
     body_t *border3 = make_box(SPACING2, BOARD_HEIGHT, BOX_COLOR, 1);
     body_t *border4 = make_box(BOARD_WIDTH, SPACING2, BOX_COLOR, 1);
-    body_set_centroid(border1, (vector_t) {BOARD_INIT_X, BOARD_INIT_Y});
-    body_set_centroid(border2, (vector_t) {BOARD_INIT_X + BOARD_WIDTH/2, BOARD_INIT_Y + BOARD_HEIGHT/2});
-    body_set_centroid(border3, (vector_t) {BOARD_INIT_X + BOARD_WIDTH, BOARD_INIT_Y});
-    body_set_centroid(border4, (vector_t) {BOARD_INIT_X + BOARD_WIDTH/2, BOARD_INIT_Y - BOARD_HEIGHT/2});
+    body_set_centroid(border1, (vector_t) {BOARD_INIT.x, BOARD_INIT.y});
+    body_set_centroid(border2, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2, BOARD_INIT.y + BOARD_HEIGHT/2});
+    body_set_centroid(border3, (vector_t) {BOARD_INIT.x + BOARD_WIDTH, BOARD_INIT.y});
+    body_set_centroid(border4, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2, BOARD_INIT.y - BOARD_HEIGHT/2});
     scene_add_body(scene, border1);
     scene_add_body(scene, border2);
     scene_add_body(scene, border3);
     scene_add_body(scene, border4);
 
     // Sets up ball alley
-    body_t *alley = make_box(ALLEY_WIDTH, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
-    body_t *alley_inside = make_box(ALLEY_WIDTH - SPACING3, ALLEY_HEIGHT - SPACING3, INNER_COLOR, 2);
-    body_set_centroid(alley, ALLEY_POINT);
-    body_set_centroid(alley_inside, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + SPACING3});
-    scene_add_body(scene, alley);
-    scene_add_body(scene, alley_inside);
+    body_t *alley1 = make_box(SPACING2, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
+    body_t *alley2 = make_box(ALLEY_WIDTH, SPACING2, (rgb_color_t) {1, 0, 1}, 1);
+    body_t *alley3 = make_box(SPACING2, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
+    body_set_centroid(alley1, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y});
+    body_set_centroid(alley2, (vector_t) {ALLEY_POINT.x + ALLEY_WIDTH/2, ALLEY_POINT.y - ALLEY_HEIGHT/2});
+    body_set_centroid(alley3, (vector_t) {ALLEY_POINT.x + ALLEY_WIDTH, ALLEY_POINT.y});
+    scene_add_body(scene, alley1);
+    scene_add_body(scene, alley2);
+    scene_add_body(scene, alley3);
 
     // Sets up segueway
 
@@ -119,22 +121,22 @@ void scene_setup(scene_t *scene){
 
 
     // Sets up dome bottom
-    body_t *cone = make_trapezoid(0, BOX_COLOR, 1);
-    body_t *cone_inside = make_trapezoid(CONE_SCALE, INNER_COLOR, 2);
-    body_set_centroid(cone, CONE_POINT);
-    body_set_centroid(cone_inside, (vector_t) {CONE_POINT.x, CONE_POINT.y + SPACING3});
-    scene_add_body(scene, cone);
-    scene_add_body(scene, cone_inside);
+    body_t *cone1 = make_trapezoid(CONE_WIDTH, CONE_HEIGHT, SPACING2, 1, BOX_COLOR, 1);
+    body_t *cone2 = make_trapezoid(CONE_WIDTH, CONE_HEIGHT, SPACING2, -1, BOX_COLOR, 1);
+    body_set_centroid(cone1, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2.15 + LOSING_WIDTH/2 - SPACING2, BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2});
+    body_set_centroid(cone2, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2.15 - LOSING_WIDTH/2 + SPACING2, BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2});
+    scene_add_body(scene, cone1);
+    scene_add_body(scene, cone2);
 
 
     // Sets up losing area
-    body_t *losing_area = make_box(RECT_WIDTH, RECT_HEIGHT/2, BOX_COLOR, 1);
-    body_set_centroid(losing_area, LOSING_POINT);
+    body_t *losing_area = make_box(LOSING_WIDTH, LOSING_HEIGHT, BOX_COLOR, 2);
+    body_set_centroid(losing_area, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2.15, BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2});
     scene_add_body(scene, losing_area);
 }
 
 void reset_game(scene_t *scene){
-
+    //is it possible to just free these objects? not free scene setup
 
 }
 

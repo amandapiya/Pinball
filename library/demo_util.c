@@ -48,21 +48,21 @@ body_t *make_box(double width, double height, rgb_color_t color, int player){
     return body_init_with_info(rect, mass, color, aux, free);
 }
 
-body_t *make_trapezoid(double scale, rgb_color_t color, int player){
+body_t *make_trapezoid(double width, double height, double spacing, double slope, rgb_color_t color, int player){
     list_t *rect = list_init(4, free);
     vector_t *v = malloc(sizeof(*v));
 
     v = malloc(sizeof(*v));
-    *v = (vector_t) {(TRAP_WIDTH + scale) / 3, scale};
+    *v = (vector_t) {0, 0};
     list_add(rect, v);
     v = malloc(sizeof(*v));
-    *v = (vector_t) {scale + TRAP_SCALE * scale, TRAP_HEIGHT - scale};
+    *v = (vector_t) {slope * width, height};
     list_add(rect, v);
     v = malloc(sizeof(*v));
-    *v = (vector_t) {TRAP_WIDTH - 2 * TRAP_SCALE * scale , TRAP_HEIGHT - scale};
+    *v = (vector_t) {slope * (width + spacing), height - spacing};
     list_add(rect, v);
     v = malloc(sizeof(*v));
-    *v = (vector_t) {(TRAP_WIDTH - scale) * 2/3, scale};
+    *v = (vector_t) {slope * spacing, -1 * spacing};
     list_add(rect, v);
 
 
