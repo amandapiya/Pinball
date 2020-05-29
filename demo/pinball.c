@@ -31,12 +31,13 @@ const double RECT_HEIGHT = 90;
 const vector_t BOX_INIT = {MAX_X - RECT_WIDTH * 1.15, MAX_Y - RECT_HEIGHT * 1.15};
 
 const double SPACING = (MAX_Y - 50 - (4 * RECT_HEIGHT))/4;
-const double SPACING2 = 35;
-const double LINE = 12;
-const double SHIFT = 7;
+const double SPACING2 = 6;
+const double SPACING3 = 12;
 
 const double BOARD_WIDTH = 900;
 const double BOARD_HEIGHT = 600;
+const double BOARD_INIT_X = 100;
+const double BOARD_INIT_Y = MAX_Y/2;
 
 const double CONE_SCALE = 5;
 const double CONE_WIDTH = 100;
@@ -79,7 +80,7 @@ void scene_setup(scene_t *scene){
     // Sets up 4 boxes
     for (int i = 0; i < 4; i++){
         body_t *box = make_box(RECT_WIDTH, RECT_HEIGHT, BOX_COLOR, 2);
-        body_t *inner_box = make_box(RECT_WIDTH - LINE, RECT_HEIGHT - LINE, INNER_COLOR, 2);
+        body_t *inner_box = make_box(RECT_WIDTH - SPACING3, RECT_HEIGHT - SPACING3, INNER_COLOR, 2);
         body_set_centroid(box, (vector_t) {BOX_INIT.x, BOX_INIT.y - i * (SPACING + RECT_HEIGHT)});
         body_set_centroid(inner_box, (vector_t) {BOX_INIT.x, BOX_INIT.y - i * (SPACING + RECT_HEIGHT)});
         scene_add_body(scene, box);
@@ -87,18 +88,24 @@ void scene_setup(scene_t *scene){
     }
 
     // Sets up pinball border
-    body_t *box2 = make_box(BOARD_WIDTH, BOARD_HEIGHT, BOX_COLOR, 2);
-    body_t *inner_box2 = make_box(BOARD_WIDTH - LINE, BOARD_HEIGHT - LINE, INNER_COLOR, 2);
-    body_set_centroid(box2, (vector_t) {(MAX_X - RECT_WIDTH - SPACING)/2, MAX_Y/2});
-    body_set_centroid(inner_box2, (vector_t) {(MAX_X - RECT_WIDTH - SPACING)/2, MAX_Y/2});
-    scene_add_body(scene, box2);
-    scene_add_body(scene, inner_box2);
+    body_t *border1 = make_box(SPACING2, BOARD_HEIGHT, BOX_COLOR, 1);
+    body_t *border2 = make_box(BOARD_WIDTH, SPACING2, BOX_COLOR, 1);
+    body_t *border3 = make_box(SPACING2, BOARD_HEIGHT, BOX_COLOR, 1);
+    body_t *border4 = make_box(BOARD_WIDTH, SPACING2, BOX_COLOR, 1);
+    body_set_centroid(border1, (vector_t) {BOARD_INIT_X, BOARD_INIT_Y});
+    body_set_centroid(border2, (vector_t) {BOARD_INIT_X + BOARD_WIDTH/2, BOARD_INIT_Y + BOARD_HEIGHT/2});
+    body_set_centroid(border3, (vector_t) {BOARD_INIT_X + BOARD_WIDTH, BOARD_INIT_Y});
+    body_set_centroid(border4, (vector_t) {BOARD_INIT_X + BOARD_WIDTH/2, BOARD_INIT_Y - BOARD_HEIGHT/2});
+    scene_add_body(scene, border1);
+    scene_add_body(scene, border2);
+    scene_add_body(scene, border3);
+    scene_add_body(scene, border4);
 
     // Sets up ball alley
     body_t *alley = make_box(ALLEY_WIDTH, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
-    body_t *alley_inside = make_box(ALLEY_WIDTH - LINE, ALLEY_HEIGHT - LINE, INNER_COLOR, 2);
+    body_t *alley_inside = make_box(ALLEY_WIDTH - SPACING3, ALLEY_HEIGHT - SPACING3, INNER_COLOR, 2);
     body_set_centroid(alley, ALLEY_POINT);
-    body_set_centroid(alley_inside, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + SHIFT});
+    body_set_centroid(alley_inside, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + SPACING3});
     scene_add_body(scene, alley);
     scene_add_body(scene, alley_inside);
 
@@ -115,7 +122,7 @@ void scene_setup(scene_t *scene){
     body_t *cone = make_trapezoid(0, BOX_COLOR, 1);
     body_t *cone_inside = make_trapezoid(CONE_SCALE, INNER_COLOR, 2);
     body_set_centroid(cone, CONE_POINT);
-    body_set_centroid(cone_inside, (vector_t) {CONE_POINT.x, CONE_POINT.y + SHIFT});
+    body_set_centroid(cone_inside, (vector_t) {CONE_POINT.x, CONE_POINT.y + SPACING3});
     scene_add_body(scene, cone);
     scene_add_body(scene, cone_inside);
 
