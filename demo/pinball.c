@@ -45,6 +45,8 @@ const double ALLEY_WIDTH = 50;
 const double ALLEY_HEIGHT = 250;
 const vector_t ALLEY_POINT = {BOARD_WIDTH - 3, MAX_Y/2 - BOARD_HEIGHT/2 + ALLEY_HEIGHT/2};
 
+const double SIDE_WALL_HEIGHT = 80;
+const vector_t WALL = {247, 270};
 
 const double LOSING_WIDTH = 250;
 const double LOSING_HEIGHT = 20;
@@ -115,23 +117,33 @@ void scene_setup(scene_t *scene){
 
 
     // Sets up dome top
+    body_aux_t *info = malloc(sizeof(body_aux_t));
+    *info = (body_aux_t){true, true, true};
+    body_t *dome = body_init_with_info(circle_sector(100, 0, 180), 10, BOX_COLOR, info, free);
+    body_set_centroid(dome, (vector_t) {MAX_X/2, MAX_Y/2});
+    //scene_add_body(scene, dome);
 
+    // Sets up mid walls
+    body_t *left_wall = make_box(SPACING2, SIDE_WALL_HEIGHT, BOX_COLOR, 1);
+    body_t *right_wall = make_box(SPACING2, SIDE_WALL_HEIGHT, BOX_COLOR, 1);
+    body_set_centroid(left_wall, (vector_t) {WALL.x, WALL.y});
+    body_set_centroid(right_wall, (vector_t) {WALL.x + LOSING_WIDTH + 2 * CONE_WIDTH - SPACING2, WALL.y});
+    scene_add_body(scene, left_wall);
+    scene_add_body(scene, right_wall);
 
-    // Sets up dome mid
-
-
-    // Sets up dome bottom
+    // Sets up cone bottom
+    double cone_x = BOARD_INIT.x + BOARD_WIDTH/2.15;
+    double cone_y = BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2;
     body_t *cone1 = make_trapezoid(CONE_WIDTH, CONE_HEIGHT, SPACING2, 1, BOX_COLOR, 1);
     body_t *cone2 = make_trapezoid(CONE_WIDTH, CONE_HEIGHT, SPACING2, -1, BOX_COLOR, 1);
-    body_set_centroid(cone1, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2.15 + LOSING_WIDTH/2 - SPACING2, BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2});
-    body_set_centroid(cone2, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2.15 - LOSING_WIDTH/2 + SPACING2, BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2});
+    body_set_centroid(cone1, (vector_t) {cone_x + LOSING_WIDTH/2 - SPACING2, cone_y});
+    body_set_centroid(cone2, (vector_t) {cone_x - LOSING_WIDTH/2 + SPACING2, cone_y});
     scene_add_body(scene, cone1);
     scene_add_body(scene, cone2);
 
-
     // Sets up losing area
     body_t *losing_area = make_box(LOSING_WIDTH, LOSING_HEIGHT, BOX_COLOR, 2);
-    body_set_centroid(losing_area, (vector_t) {BOARD_INIT.x + BOARD_WIDTH/2.15, BOARD_INIT.y - BOARD_HEIGHT/2 + LOSING_HEIGHT/2});
+    body_set_centroid(losing_area, (vector_t) {cone_x, cone_y});
     scene_add_body(scene, losing_area);
 }
 

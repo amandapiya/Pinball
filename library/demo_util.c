@@ -37,6 +37,7 @@ body_t *make_box(double width, double height, rgb_color_t color, int player){
       list_add(rect, v);
       half_shape.y  *= -1;
     }
+
     double mass = MASS;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     if (player == 1){
@@ -51,8 +52,6 @@ body_t *make_box(double width, double height, rgb_color_t color, int player){
 body_t *make_trapezoid(double width, double height, double spacing, double slope, rgb_color_t color, int player){
     list_t *rect = list_init(4, free);
     vector_t *v = malloc(sizeof(*v));
-
-    v = malloc(sizeof(*v));
     *v = (vector_t) {0, 0};
     list_add(rect, v);
     v = malloc(sizeof(*v));
@@ -64,7 +63,6 @@ body_t *make_trapezoid(double width, double height, double spacing, double slope
     v = malloc(sizeof(*v));
     *v = (vector_t) {slope * spacing, -1 * spacing};
     list_add(rect, v);
-
 
     double mass = MASS;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
