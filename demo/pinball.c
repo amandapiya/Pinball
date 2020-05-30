@@ -38,12 +38,16 @@ const double BOARD_WIDTH = 900;
 const double BOARD_HEIGHT = 600;
 const vector_t BOARD_INIT = {100, MAX_Y/2};
 
+const double SEGUEWAY_LEFT_WIDTH = 106;
+const double SEGUEWAY_LEFT_HEIGHT = 35;
+const double SEGUEWAY_DELTA_X = 22;
+
 const double CONE_WIDTH = 150;
 const double CONE_HEIGHT = 200;
 
 const double ALLEY_WIDTH = 50;
 const double ALLEY_HEIGHT = 250;
-const vector_t ALLEY_POINT = {BOARD_WIDTH - 3, MAX_Y/2 - BOARD_HEIGHT/2 + ALLEY_HEIGHT/2};
+const vector_t ALLEY_POINT = {BOARD_WIDTH - 3 + ALLEY_WIDTH/2, MAX_Y/2 - BOARD_HEIGHT/2 + ALLEY_HEIGHT/2};
 
 const double SIDE_WALL_HEIGHT = 80;
 const vector_t WALL = {247, 270};
@@ -106,15 +110,20 @@ void scene_setup(scene_t *scene){
     body_t *alley1 = make_box(SPACING2, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
     body_t *alley2 = make_box(ALLEY_WIDTH, SPACING2, (rgb_color_t) {1, 0, 1}, 1);
     body_t *alley3 = make_box(SPACING2, ALLEY_HEIGHT, (rgb_color_t) {1, 0, 1}, 1);
-    body_set_centroid(alley1, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y});
-    body_set_centroid(alley2, (vector_t) {ALLEY_POINT.x + ALLEY_WIDTH/2, ALLEY_POINT.y - ALLEY_HEIGHT/2});
-    body_set_centroid(alley3, (vector_t) {ALLEY_POINT.x + ALLEY_WIDTH, ALLEY_POINT.y});
+    body_set_centroid(alley1, (vector_t) {ALLEY_POINT.x - ALLEY_WIDTH/2, ALLEY_POINT.y});
+    body_set_centroid(alley2, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y - ALLEY_HEIGHT/2});
+    body_set_centroid(alley3, (vector_t) {ALLEY_POINT.x + ALLEY_WIDTH/2, ALLEY_POINT.y});
     scene_add_body(scene, alley1);
     scene_add_body(scene, alley2);
     scene_add_body(scene, alley3);
 
     // Sets up segueway
-
+    body_t *segueway1 = make_trapezoid(SEGUEWAY_LEFT_WIDTH, SEGUEWAY_LEFT_HEIGHT, SPACING2, -1, BOX_COLOR, 1);
+    body_t *segueway2 = make_box(SPACING2, SIDE_WALL_HEIGHT, BOX_COLOR, 1);
+    body_set_centroid(segueway1, (vector_t) {ALLEY_POINT.x - SEGUEWAY_DELTA_X, ALLEY_POINT.y + ALLEY_HEIGHT/2});
+    body_set_centroid(segueway2, (vector_t) {ALLEY_POINT.x  + ALLEY_WIDTH/2, ALLEY_POINT.y + ALLEY_HEIGHT/2 + SIDE_WALL_HEIGHT/2});
+    scene_add_body(scene, segueway1);
+    scene_add_body(scene, segueway2);
 
     // Sets up dome top
     body_aux_t *info = malloc(sizeof(body_aux_t));
