@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include "sdl_wrapper.h"
+#include "swinger.h"
 
 #define WINDOW_TITLE "CS 3"
 #define WINDOW_WIDTH 1300
@@ -197,13 +198,19 @@ void sdl_show(void) {
     SDL_RenderPresent(renderer);
 }
 
-void sdl_render_scene(scene_t *scene){
+void sdl_render_scene(scene_t *scene, list_t *swlist){
     sdl_clear();
     size_t body_count = scene_bodies(scene);
     for (size_t i = 0; i < body_count; i++) {
         body_t *body = scene_get_body(scene, i);
         list_t *shape = body_get_shape(body);
         sdl_draw_polygon(shape, body_get_color(body));
+        list_free(shape);
+    }
+    for (size_t j = 0; j < list_size(swlist); j++){
+        swinger_t *s = list_get(swlist, j);
+        list_t *shape = swinger_get_shape(s);
+        sdl_draw_polygon(shape, swinger_get_color(s));
         list_free(shape);
     }
     curr_scene = scene;

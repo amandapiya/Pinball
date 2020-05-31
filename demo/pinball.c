@@ -14,6 +14,7 @@
 #include "sdl_wrapper.h"
 #include "collision.h"
 #include "body.h"
+#include "swinger.h"
 #include "demo_util.h"
 
 #define WINDOW_TITLE "CS 3"
@@ -58,6 +59,11 @@ void reset_game(scene_t *scene){
 int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
+    list_t *swingers = list_init(1, (free_func_t)swinger_free);
+    swinger_t *s1 = swinger_init((vector_t){300, 300}, M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
+    swinger_t *s2 = swinger_init((vector_t){600, 300}, 3*M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
+    list_add(swingers, s1);
+    list_add(swingers, s2);
     double total_time = 0.0;
 
     scene_setup(scene);
@@ -68,7 +74,7 @@ int main(){
         double dt = time_since_last_tick();
         total_time += dt;
         scene_tick(scene, dt);
-        sdl_render_scene(scene);
+        sdl_render_scene(scene, swingers);
     }
     scene_free(scene);
   }

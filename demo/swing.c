@@ -26,6 +26,9 @@ const double MAX_X = 1300;
 const double MAX_Y = 650;
 const double TIME_DIVISION = 11;
 
+//void swinger_tick(swinger_t s1, swinger_t s2){
+
+    
 int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();

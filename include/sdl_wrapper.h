@@ -80,7 +80,7 @@ void sdl_show(void);
  *
  * @param scene the scene to draw
  */
-void sdl_render_scene(scene_t *scene);
+void sdl_render_scene(scene_t *scene, list_t *swlist);
 
 /**
  * Registers a function to be called every time a key is pressed.
@@ -119,4 +119,3 @@ void sdl_on_key(key_handler_t handler);
 double time_since_last_tick(void);
 
 #endif // #ifndef __SDL_WRAPPER_H__
-
