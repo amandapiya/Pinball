@@ -37,7 +37,8 @@ body_t *get_player(scene_t *scene){
 }
 
 void player_on_key(char key, key_event_type_t type, double held_time, void *scene) {
-    body_t *player = get_player(scene);
+    // we can delete this right? there is no "player"
+    /*body_t *player = get_player(scene);
     if (player != NULL){
         if (type == KEY_PRESSED){
             switch (key) {
@@ -48,12 +49,21 @@ void player_on_key(char key, key_event_type_t type, double held_time, void *scen
         else {
             body_set_velocity(player, VEC_ZERO);
         }
+    }*/
+    if (type == KEY_PRESSED){
+        switch (key) {
+            case (LEFT_ARROW):
+                printf("LEFT\n");
+                break;
+            case (RIGHT_ARROW):
+                printf("RIGHT\n");
+                break;
+        }
     }
 }
 
 void reset_game(scene_t *scene){
     //is it possible to just free these objects? not free scene setup
-
 }
 
 int main(){
@@ -73,8 +83,12 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
+        swinger_tick(s1, dt);
+        swinger_tick(s2, dt);
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
     }
+    swinger_free(s1);
+    swinger_free(s2);
     scene_free(scene);
   }

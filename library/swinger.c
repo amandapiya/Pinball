@@ -11,6 +11,7 @@
 
 const int RADIUS = 20;
 const double INCREMENT = 0.1;
+const int SWINGER_MASS = 20;
 
 typedef struct swinger {
     list_t *shape;
@@ -23,6 +24,31 @@ typedef struct swinger {
     double momentum; // of the angular variety :)
 } swinger_t;
 
+list_t *make_shape(vector_t center, double angle, double length){
+    list_t *vertices = list_init(1, free);
+    // makes tip
+    vector_t *vertex_add = malloc(sizeof(vector_t));
+    vertex_add->x = cos(angle) * length;
+    vertex_add->y = sin(angle) * length;
+    vector_t *point = malloc(sizeof(vector_t));
+    *point = vec_add(center, *vertex_add);
+    list_add(vertices, point);
+    free(vertex_add);
+    // makes semi-circle
+    double theta = angle + M_PI/2;
+    while (theta < angle + 3*M_PI/2){
+        vector_t *vertex_add = malloc(sizeof(vector_t));
+        vertex_add->x = cos(theta) * RADIUS;
+        vertex_add->y = sin(theta) * RADIUS;
+        vector_t *point = malloc(sizeof(vector_t));
+        *point = vec_add(center, *vertex_add);
+        list_add(vertices, point);
+        free(vertex_add);
+        theta += INCREMENT;
+    }
+    return vertices;
+}
+
 swinger_t *swinger_init(vector_t center, double angle, double length, rgb_color_t color){
     swinger_t *new = malloc(sizeof(swinger_t));
     assert(new != NULL);
@@ -33,27 +59,8 @@ swinger_t *swinger_init(vector_t center, double angle, double length, rgb_color_
     new->torque = 0;
     new->force = VEC_ZERO;
     new->momentum = 0;
-    new->shape = list_init(1, free);
+    new->shape = make_shape(center, angle, length);
 
-    vector_t *vertex_add = malloc(sizeof(vector_t));
-    vertex_add->x = cos(angle) * length;
-    vertex_add->y = sin(angle) * length;
-    vector_t *point = malloc(sizeof(vector_t));
-    *point = vec_add(center, *vertex_add);
-    list_add(new->shape, point);
-    free(vertex_add);
-
-    double theta = angle + M_PI/2;
-    while (theta < angle + 3*M_PI/2){
-        vector_t *vertex_add = malloc(sizeof(vector_t));
-        vertex_add->x = cos(theta) * RADIUS;
-        vertex_add->y = sin(theta) * RADIUS;
-        vector_t *point = malloc(sizeof(vector_t));
-        *point = vec_add(center, *vertex_add);
-        list_add(new->shape, point);
-        free(vertex_add);
-        theta += INCREMENT;
-    }
     return new;
 }
 
@@ -95,11 +102,6 @@ void swinger_set_color(swinger_t *swinger, rgb_color_t new_color){
 void swinger_set_torque(swinger_t *swinger, double t){
     swinger->torque = t;
 }
-
-//void swinger_set_angle(swinger_t *swinger, double angle){
-    // TODO
-//}
-
 void swinger_add_force(swinger_t *swinger, vector_t force){
     // Not sure if needed, maybe remove
 }
@@ -109,5 +111,10 @@ void swinger_add_momentum(swinger_t *swinger, double m){
 }
 
 void swinger_tick(swinger_t *swinger, double dt){
-    // TODO!
+    double rotation_angle = dt * swinger->torque;
+    free(swinger->shape);
+    swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
+    swinger->momentum = 0;
+    swinger->angle = swinger->angle + rotation_angle;
+    swinger->shape = make_shape(swinger->center, swinger->angle + rotation_angle, swinger->length);
 }
