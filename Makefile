@@ -16,14 +16,14 @@ LIB_MATH = -lm
 LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx
 
 # List of demo programs
-DEMOS = pinball
+DEMOS = pinball swing
 # List of C files in "libraries" that we provide
 STAFF_LIBS = test_util demo_util sdl_wrapper
 # List of C files in "libraries" that you will write
 STUDENT_LIBS = vector list \
 	collision_storage \
 	collision \
-	polygon body scene \
+	polygon body scene swinger \
 	aux force_storage \
 	forces \
 	color \

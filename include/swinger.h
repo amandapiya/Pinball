@@ -60,7 +60,7 @@ rgb_color_t swinger_get_color(swinger_t *swinger);
 /**
  * Gets the angular momentum associated with a swinger.
  */
-vector_t swinger_get_momentum(swinger_t *swinger);
+double swinger_get_momentum(swinger_t *swinger);
 
 void swinger_set_color(swinger_t *swinger, rgb_color_t new_color);
 
@@ -73,7 +73,7 @@ void swinger_set_torque(swinger_t *swinger, double t);
  * Changes a swinger's orientation in the plane.
  * The swinger is modified so it points towards the given angle.
  */
-void swinger_set_angle(swinger_t *swinger, double angle);
+// void swinger_set_angle(swinger_t *swinger, double angle);
 
 /**
  * Applies a force to a swinger over the current tick.

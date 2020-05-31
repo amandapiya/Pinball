@@ -9,15 +9,18 @@
 #include "swinger.h"
 #include <stdbool.h>
 
+const int RADIUS = 20;
+const double INCREMENT = 0.1;
+
 typedef struct swinger {
     list_t *shape;
     rgb_color_t color;
     vector_t center;
     double angle;
     double length; // distance from swinger center to outer point
-    vector_t torque;
+    double torque;
     vector_t force;
-    vector_t momentum; // of the angular variety :)
+    double momentum; // of the angular variety :)
 } swinger_t;
 
 swinger_t *swinger_init(vector_t center, double angle, double length, rgb_color_t color){
@@ -27,13 +30,30 @@ swinger_t *swinger_init(vector_t center, double angle, double length, rgb_color_
     new->center = center;
     new->angle =  angle;
     new->length = length;
-    new->torque = VEC_ZERO;
+    new->torque = 0;
     new->force = VEC_ZERO;
-    new->momentum = VEC_ZERO;
+    new->momentum = 0;
+    new->shape = list_init(1, free);
 
-    // make the shape, semi-circle + the outer point
-    // TODO
-    new->shape = NULL;
+    vector_t *vertex_add = malloc(sizeof(vector_t));
+    vertex_add->x = cos(angle) * length;
+    vertex_add->y = sin(angle) * length;
+    vector_t *point = malloc(sizeof(vector_t));
+    *point = vec_add(center, *vertex_add);
+    list_add(new->shape, point);
+    free(vertex_add);
+
+    double theta = angle + M_PI/2;
+    while (theta < angle + 3*M_PI/2){
+        vector_t *vertex_add = malloc(sizeof(vector_t));
+        vertex_add->x = cos(theta) * RADIUS;
+        vertex_add->y = sin(theta) * RADIUS;
+        vector_t *point = malloc(sizeof(vector_t));
+        *point = vec_add(center, *vertex_add);
+        list_add(new->shape, point);
+        free(vertex_add);
+        theta += INCREMENT;
+    }
     return new;
 }
 
@@ -54,7 +74,7 @@ list_t *swinger_get_shape(swinger_t *swinger){
 
 vector_t swinger_get_center(swinger_t *swinger){
     return swinger->center;
-
+}
 
 double swinger_get_torque(swinger_t *swinger){
     return swinger->torque;
@@ -64,7 +84,7 @@ rgb_color_t swinger_get_color(swinger_t *swinger){
     return swinger->color;
 }
 
-vector_t swinger_get_momentum(swinger_t *swinger){
+double swinger_get_momentum(swinger_t *swinger){
     return swinger->momentum;
 }
 
@@ -76,9 +96,9 @@ void swinger_set_torque(swinger_t *swinger, double t){
     swinger->torque = t;
 }
 
-void swinger_set_angle(swinger_t *swinger, double angle){
+//void swinger_set_angle(swinger_t *swinger, double angle){
     // TODO
-}
+//}
 
 void swinger_add_force(swinger_t *swinger, vector_t force){
     // Not sure if needed, maybe remove
