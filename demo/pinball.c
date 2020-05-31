@@ -26,29 +26,24 @@ const double MAX_Y = 650;
 const double TIME_DIVISION = 11;
 const rgb_color_t BOX_COLOR = {0, 0, 0};
 const rgb_color_t INNER_COLOR = {1, 1, 1};
-
 const vector_t BOX_SPEC = {150, 90};
 const vector_t BOX_POINT = {MAX_X - 150 * 1.15, MAX_Y - 90 * 1.15};
-
 const double SPACING_BOXES = 12;
 const double SPACING_BOX_GAP = (MAX_Y - 50 - (4 * 90))/4;
 const double SPACING = 6;
-
 const vector_t BOARD_SPEC = {900, 600};
 const vector_t BOARD_POINT = {100, MAX_Y/2};
-
 const vector_t SEGUEWAY_LEFT_SPEC = {68, 20};
-const double SEGUEWAY_DELTA_X = 22;
-
+const double SEGUEWAY_DELTA = 22;
+const vector_t CORNER_SPEC = {75, 70};
+const double CORNER_DELTA = 4;
+const double ROOF_WIDTH = 635;
 const vector_t CONE_SPEC = {210, 260};
 const vector_t CONE_POINT = {500, 35};
-
 const vector_t ALLEY_SPEC = {50, 250};
 const vector_t ALLEY_POINT = {900 - 3 + 50/2, MAX_Y/2 - 600/2 + 250/2};
-
-const vector_t WALL_HEIGHT = {250, 260};
-const vector_t LEFT_WALL_SPEC = {170, 413};
-
+const vector_t WALL_HEIGHT = {245, 260};
+const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
 
 body_t *get_player(scene_t *scene){
@@ -92,7 +87,7 @@ void scene_setup(scene_t *scene){
     body_t *border2 = make_box(BOARD_SPEC.x, SPACING, BOX_COLOR, 1);
     body_t *border3 = make_box(SPACING, BOARD_SPEC.y, BOX_COLOR, 1);
     body_t *border4 = make_box(BOARD_SPEC.x, SPACING, BOX_COLOR, 1);
-    body_set_centroid(border1, (vector_t) {BOARD_POINT.x, BOARD_POINT.y});
+    body_set_centroid(border1, BOARD_POINT);
     body_set_centroid(border2, (vector_t) {BOARD_POINT.x + BOARD_SPEC.x/2, BOARD_POINT.y + BOARD_SPEC.y/2});
     body_set_centroid(border3, (vector_t) {BOARD_POINT.x + BOARD_SPEC.x, BOARD_POINT.y});
     body_set_centroid(border4, (vector_t) {BOARD_POINT.x + BOARD_SPEC.x/2, BOARD_POINT.y - BOARD_SPEC.y/2});
@@ -112,21 +107,33 @@ void scene_setup(scene_t *scene){
     scene_add_body(scene, alley2);
     scene_add_body(scene, alley3);
 
+    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
+
     // Sets up segueway
-    body_t *segueway1 = make_trapezoid(SEGUEWAY_LEFT_SPEC.x, SEGUEWAY_LEFT_SPEC.y, SPACING, -1, BOX_COLOR, 1);
-    body_t *segueway2 = make_box(SPACING, WALL_HEIGHT.y, BOX_COLOR, 1);
-    body_set_centroid(segueway1, (vector_t) {ALLEY_POINT.x - SEGUEWAY_DELTA_X, ALLEY_POINT.y + ALLEY_SPEC.y/2});
-    body_set_centroid(segueway2, (vector_t) {ALLEY_POINT.x  + ALLEY_SPEC.x/2, ALLEY_POINT.y + ALLEY_SPEC.y/2 + WALL_HEIGHT.y/2});
-    scene_add_body(scene, segueway1);
-    scene_add_body(scene, segueway2);
+    body_t *segueway = make_trapezoid(SEGUEWAY_LEFT_SPEC.x, SEGUEWAY_LEFT_SPEC.y, SPACING, -1, BOX_COLOR, 1);
+    body_set_centroid(segueway, (vector_t) {ALLEY_POINT.x - SEGUEWAY_DELTA, alley_top});
+    scene_add_body(scene, segueway);
 
-    // Sets up dome top
+    // Sets up outer walls
+    body_t *wall_left = make_box(SPACING, WALL_HEIGHT.x, BOX_COLOR, 1);
+    body_t *wall_right = make_box(SPACING, WALL_HEIGHT.y, BOX_COLOR, 1);
+    body_set_centroid(wall_left, LEFT_WALL_SPEC);
+    body_set_centroid(wall_right, (vector_t) {ALLEY_POINT.x  + ALLEY_SPEC.x/2, alley_top + WALL_HEIGHT.y/2});
+    scene_add_body(scene, wall_left);
+    scene_add_body(scene, wall_right);
 
+    // Sets up corner guards
+    body_t *corner_left = make_trapezoid(CORNER_SPEC.x, CORNER_SPEC.y, SPACING, 1, BOX_COLOR, 1);
+    body_t *corner_right = make_trapezoid(CORNER_SPEC.x, CORNER_SPEC.y, SPACING, -1, BOX_COLOR, 1);
+    body_set_centroid(corner_left, (vector_t) {LEFT_WALL_SPEC.x - CORNER_DELTA, alley_top + WALL_HEIGHT.y});
+    body_set_centroid(corner_right, (vector_t) {ALLEY_POINT.x  + ALLEY_SPEC.x/2 + CORNER_DELTA, alley_top + WALL_HEIGHT.y});
+    scene_add_body(scene, corner_left);
+    scene_add_body(scene, corner_right);
 
-    // Sets up left wall
-    body_t *left_wall = make_box(SPACING, WALL_HEIGHT.x, BOX_COLOR, 1);
-    body_set_centroid(left_wall, LEFT_WALL_SPEC);
-    scene_add_body(scene, left_wall);
+    // Sets up roof
+    body_t *roof = make_box(ROOF_WIDTH, SPACING, BOX_COLOR, 1);
+    body_set_centroid(roof, (vector_t) {BOARD_POINT.x + BOARD_SPEC.x/2 + SPACING, alley_top + WALL_HEIGHT.y + CORNER_SPEC.y - SPACING/2});
+    scene_add_body(scene, roof);
 
     // Sets up cone bottom
     body_t *cone1 = make_trapezoid(CONE_SPEC.x, CONE_SPEC.y, SPACING, 1, BOX_COLOR, 1);
