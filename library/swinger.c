@@ -121,8 +121,8 @@ void swinger_tick(swinger_t *swinger, double dt){
 
     if (fabs(rotation_angle) > 0){ // if torque is not zero
         // prevent swinger from going down past starting angle
-        if ((swinger->start_angle > 3*M_PI/2 && swinger->angle < 11*M_PI/6) ||
-             (swinger->start_angle < 3*M_PI/2 && swinger->angle > 7*M_PI/6)){ // left swinger
+        if ((fabs(swinger->start_angle - 11*M_PI/6) < SWING_EPSILON && swinger->angle < 11*M_PI/6) ||
+             (fabs(swinger->start_angle - 7*M_PI/6) < SWING_EPSILON && swinger->angle > 7*M_PI/6)){ // left swinger
             swinger->angle = swinger->start_angle;
             free(swinger->shape);
             swinger->shape = make_shape(swinger->center, swinger->start_angle, swinger->length);
