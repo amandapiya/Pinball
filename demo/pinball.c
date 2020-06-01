@@ -51,9 +51,9 @@ const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {0.50, 0.50, 0.50};
 
-const double BALL_HEIGHT = 30.0;
+const double BALL_HEIGHT = 65.0;
 // Grav constants
-const double G = 6.67E-11;
+const double G = 6.67E11;
 const double M = 6E24;
 const double g = 9.8;
 
@@ -167,7 +167,7 @@ void make_pinball_border(scene_t *scene){
     for (size_t i = 0; i < list_size(pinball_border); i++){
         body_t *b = list_get(pinball_border, i);
         scene_add_body(scene, b);
-//        create_physics_collision(scene, 0.6, ball, b);
+        create_physics_collision(scene, 0.75, ball, b);
     }
 }
 
@@ -192,8 +192,14 @@ void spring_bounds(scene_t *scene){
             body_set_centroid(grav, gravity_center);
             scene_add_body(scene, grav);
             create_newtonian_gravity(scene, G, ball, grav);  
-            body_set_velocity(ball, (vector_t) {0.0, -15.0});
+
+//            body_set_velocity(ball, (vector_t) {0.0, -15.0});
         } 
+        else if (added_grav == true){    
+            vector_t temp_v = body_get_velocity(ball);
+            temp_v.y -= 1;
+            body_set_velocity(ball, temp_v);
+        }
     }
 }
 
@@ -258,8 +264,8 @@ void reset_game(scene_t *scene){
     added_grav = false;
 
     // add ball
-    double ball_mass = 2.0;
-    double ball_error = 20.0;
+    double ball_mass = 5.0;
+    double ball_error = 30.0;
     body_t *ball = make_circle(ALLEY_SPEC.x / 2 - ball_error, 0, 2 * M_PI, 
         BALL_COLOR, ball_mass, 1.0);
     body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT})); 
@@ -271,7 +277,7 @@ void reset_game(scene_t *scene){
     body_t *spring = make_box(ALLEY_SPEC.x - 5.0, spring_height,
         spring_color, 1);
     vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + 
-        BALL_HEIGHT - 100 - (ALLEY_SPEC.x / 2 - ball_error) - (spring_height / 2)};
+        BALL_HEIGHT - (ALLEY_SPEC.x / 2 - ball_error) - (spring_height / 2)};
     body_set_centroid(spring, spring_start_pos);
     scene_add_body(scene, spring);
 
@@ -309,9 +315,7 @@ int main(){
         //printf("TORQUE: %f\n", swinger_get_torque(s1));
         //printf("MOMENTUM: %f\n", swinger_get_momentum(s2));
 
-	vector_t temp_v = body_get_velocity(scene_get_body(scene, 0));
-	temp_v.y -= 1;
-	body_set_velocity(scene_get_body(scene, 0), temp_v);
+	
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);
         scene_tick(scene, dt);

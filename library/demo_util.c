@@ -19,7 +19,7 @@ const double TRAP_WIDTH = 250;
 const double TRAP_HEIGHT = 100;
 const double TRAP_SCALE = 1.2;
 const double EPSILON = 0.001;
-const double ANGLE_BETWEEN_POINTS = 0.1;
+const double ANGLE_BETWEEN_POINTS = 0.01;
 
 body_t *make_box(double width, double height, rgb_color_t color, int spring){
     vector_t centroid = VEC_ZERO;
