@@ -5,6 +5,7 @@
 
 typedef struct {
     bool is_player;
+    bool is_spring;
     bool is_bumper;
 } body_aux_t;
 

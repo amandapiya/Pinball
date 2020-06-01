@@ -10,7 +10,7 @@
 #include "color.h"
 #include "collision_storage.h"
 
-const double TOO_CLOSE_GRAV = 75.0;
+const double TOO_CLOSE_GRAV = 5.0;
 const float COLOR_UPDATE = 0.1;
 
 void gravity_force(aux_t *aux){
@@ -19,17 +19,16 @@ void gravity_force(aux_t *aux){
     body_t *body2 = aux_get_body2(aux);
     double m1 = body_get_mass(body1);
     double m2 = body_get_mass(body2);
-
     vector_t r2minus1= vec_subtract(body_get_centroid(body2), body_get_centroid(body1));
     double r12 = sqrt(vec_dot(r2minus1, r2minus1));
     vector_t r = vec_multiply(1.0 / r12, r2minus1);
+    
     if (r12 > TOO_CLOSE_GRAV){
         // define how close we want bodies to be for force to be ignored
         vector_t F21 = vec_multiply((-G * m1 * m2 / (r12 * r12)), r);
         body_add_force(body2, F21);
         body_add_force(body1, vec_negate(F21));
     }
-
 }
 
 void create_newtonian_gravity(scene_t *scene, double G, body_t *body1, body_t *body2){

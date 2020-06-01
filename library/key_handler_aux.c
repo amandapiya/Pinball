@@ -9,14 +9,16 @@ typedef struct key_handler_aux{
     scene_t *scene; // set this val to anything for collisions
     swinger_t *swinger1;
     swinger_t *swinger2; // set this body to null for drag
+    body_t *spring;
 } key_handler_aux_t;
 
-key_handler_aux_t *key_handler_aux_init(scene_t *scene, swinger_t *swing1, swinger_t *swing2){
+key_handler_aux_t *key_handler_aux_init(scene_t *scene, swinger_t *swing1, swinger_t *swing2, body_t *spring){
     key_handler_aux_t *aux = malloc(sizeof(key_handler_aux_t));
     assert(aux != NULL);
     aux->scene = scene;
     aux->swinger1 = swing1;
     aux->swinger2 = swing2;
+    aux->spring = spring;
     return aux;
 }
 
@@ -43,4 +45,8 @@ swinger_t *key_aux_get_swinger2(key_handler_aux_t *aux){
  */
 scene_t *key_aux_get_scene(key_handler_aux_t *aux){
     return aux->scene;
+}
+
+body_t *key_aux_get_spring(key_handler_aux_t *aux){
+    return aux->spring;
 }

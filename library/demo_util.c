@@ -21,17 +21,7 @@ const double TRAP_SCALE = 1.2;
 const double EPSILON = 0.001;
 const double ANGLE_BETWEEN_POINTS = 0.1;
 
-body_t *get_player(scene_t *scene){
-    for (size_t i = 0; i < scene_bodies(scene); i++){
-        body_t *player = scene_get_body(scene, i);
-        if(((body_aux_t*) body_get_info(player))->is_player) {
-            return player;
-        }
-    }
-    return NULL;
-}
-
-body_t *make_box(double width, double height, rgb_color_t color, int player){
+body_t *make_box(double width, double height, rgb_color_t color, int spring){
     vector_t centroid = VEC_ZERO;
     vector_t half_shape = {width/2, height/2};
     list_t *rect = list_init(4, free);
@@ -47,13 +37,14 @@ body_t *make_box(double width, double height, rgb_color_t color, int player){
       half_shape.y  *= -1;
     }
 
-    double mass = MASS;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    if (player == 1){
-      *aux = (body_aux_t){false, true};
-      mass = INFINITY;
+    double mass;
+    if (spring == 1){
+        mass = 100.0;
+        *aux = (body_aux_t){false, true, false};
     }else{
-      *aux = (body_aux_t) {true, true};
+        *aux = (body_aux_t) {false, false, false};
+        mass = INFINITY;
     }
     return body_init_with_info(rect, mass, color, aux, free);
 }
@@ -76,10 +67,10 @@ body_t *make_trapezoid(double width, double height, double spacing, double slope
     double mass = MASS;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     if (player == 1){
-      *aux = (body_aux_t){false, true};
+      *aux = (body_aux_t){false, false, false};
       mass = INFINITY;
     }else{
-      *aux = (body_aux_t) {false, false};
+      *aux = (body_aux_t) {false, false, false};
     }
     return body_init_with_info(rect, mass, color, aux, free);
 }
@@ -106,9 +97,9 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad,
     }
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     if (player == 1){
-      *aux = (body_aux_t){false, true};
+        *aux = (body_aux_t){true, false, false};
     }else{
-      *aux = (body_aux_t) {false, false};
+        *aux = (body_aux_t) {false, false, false};
     }
     return body_init_with_info(points, mass, color, aux, free);
 }
