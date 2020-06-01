@@ -11,7 +11,7 @@
 
 const int RADIUS = 20;
 const double INCREMENT = 0.1;
-const double EPSILON = 0.01;
+const double SWING_EPSILON = 0.01;
 const int SWINGER_MASS = 100;
 const int GRAVITY = 100;
 
@@ -119,7 +119,7 @@ void swinger_tick(swinger_t *swinger, double dt){
     swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
     swinger->momentum = 0;
 
-    if (fabs(rotation_angle) > EPSILON){ // if torque is not zero
+    if (fabs(rotation_angle) > SWING_EPSILON){ // if torque is not zero
         swinger->angle = swinger->angle + rotation_angle;
         if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far
             free(swinger->shape);
