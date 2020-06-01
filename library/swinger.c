@@ -123,11 +123,11 @@ void swinger_tick(swinger_t *swinger, double dt){
         if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far
             free(swinger->shape);
             if (swinger->angle < swinger->start_angle){
-                swinger->shape = swinger->start_angle - M_PI/2;
+                swinger->angle = swinger->start_angle - M_PI/2;
                 swinger->shape = make_shape(swinger->center, swinger->start_angle - M_PI/2, swinger->length);
             }
             else {
-                swinger->shape = swinger->start_angle + M_PI/2;
+                swinger->angle = swinger->start_angle + M_PI/2;
                 swinger->shape = make_shape(swinger->center, swinger->start_angle + M_PI/2, swinger->length);
             }        
         }
