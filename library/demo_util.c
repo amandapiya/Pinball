@@ -40,7 +40,7 @@ body_t *make_box(double width, double height, rgb_color_t color, int spring){
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     double mass;
     if (spring == 1){
-        mass = 100.0;
+        mass = 200.0;
         *aux = (body_aux_t){false, true, false};
     }else{
         *aux = (body_aux_t) {false, false, false};

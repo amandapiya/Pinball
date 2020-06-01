@@ -147,7 +147,7 @@ void swinger_tick(swinger_t *swinger, double dt){
 
     // create momentum to move swinger back to original position
     if (fabs(swinger->angle - swinger->start_angle) > INCREMENT){
-        double gravity_momentum = GRAVITY * swinger->start_angle - swinger->angle);
+        double gravity_momentum = GRAVITY * swinger->start_angle - swinger->angle;
         swinger_add_momentum(swinger, gravity_momentum);
     }
 }
