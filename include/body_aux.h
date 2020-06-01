@@ -5,12 +5,7 @@
 
 typedef struct {
     bool is_player;
-    bool is_enemy;
-    bool is_circle;
-    // if body is not to be removed (e.g. walls or players, set health < 0)
-    // if body is to be removed, set health > 0
-    // remove body if health == 0
-    int health;
+    bool is_bumper;
 } body_aux_t;
 
 extern const body_aux_t PROP;

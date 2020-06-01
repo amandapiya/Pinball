@@ -69,26 +69,7 @@ void destructive_collision(body_t *body1, body_t *body2, vector_t axis, void *au
     body_remove(body2);
 }
 
-void health_diminish(body_t *body){
-    body_aux_t *aux = (body_aux_t*) body_get_info(body);
-
-    if(aux->is_enemy){
-        aux->health--;
-        // update color
-        if (aux->health > 0){
-            body_set_color(body, lighter_color(body_get_color(body)));
-        }
-
-        if (aux->health == 0){
-            body_remove(body);
-        }
-    }
-}
-
 void physics_collision(body_t *body1, body_t *body2, vector_t axis, void *aux) {
-    health_diminish(body1);
-    health_diminish(body2);
-
     double elasticity_val = aux_get_constant(aux);
     double player_dot_product = vec_dot(body_get_velocity(body1), axis);
     double enemy_dot_product = vec_dot(body_get_velocity(body2), axis);
