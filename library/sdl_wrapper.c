@@ -6,6 +6,7 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include "sdl_wrapper.h"
 #include "swinger.h"
+#include "key_handler_aux.h"
 
 #define WINDOW_TITLE "CS 3"
 #define WINDOW_WIDTH 1300
@@ -47,6 +48,8 @@ clock_t last_clock = 0;
  * Global variable to store the scene
  */
 scene_t *curr_scene;
+swinger_t *curr_swing1;
+swinger_t *curr_swing2;
 
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void){
@@ -150,7 +153,8 @@ bool sdl_is_done(void){
                 assert(curr_scene != NULL);
 //                body_t *player = scene_get_body(curr_scene, 0);
 //                assert(player != NULL);
-                key_handler(key, type, held_time, curr_scene);
+                key_handler_aux_t *key_aux = key_handler_aux_init(curr_scene, curr_swing1, curr_swing2);
+                key_handler(key, type, held_time, key_aux);
                 break;
         }
     }
@@ -214,6 +218,8 @@ void sdl_render_scene(scene_t *scene, list_t *swlist){
         list_free(shape);
     }
     curr_scene = scene;
+    curr_swing1 = list_get(swlist, 0);
+    curr_swing2 = list_get(swlist, 1);
     sdl_show();
 }
 

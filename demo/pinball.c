@@ -15,6 +15,7 @@
 #include "collision.h"
 #include "body.h"
 #include "swinger.h"
+#include "key_handler_aux.h"
 #include "demo_util.h"
 
 #define WINDOW_TITLE "CS 3"
@@ -25,6 +26,7 @@ const double MIN_XY = 0;
 const double MAX_X = 1300;
 const double MAX_Y = 650;
 const double TIME_DIVISION = 11;
+const double MOMENTUM_CONSTANT = 10;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -36,7 +38,7 @@ body_t *get_player(scene_t *scene){
     return NULL;
 }
 
-void player_on_key(char key, key_event_type_t type, double held_time, void *scene) {
+void player_on_key(char key, key_event_type_t type, double held_time, void *key_handler_aux) {
     // we can delete this right? there is no "player"
     /*body_t *player = get_player(scene);
     if (player != NULL){
@@ -54,9 +56,15 @@ void player_on_key(char key, key_event_type_t type, double held_time, void *scen
         switch (key) {
             case (LEFT_ARROW):
                 printf("LEFT\n");
+                swinger_t *s = key_aux_get_swinger1(key_handler_aux);
+                double momentum = held_time * MOMENTUM_CONSTANT;
+                swinger_add_momentum(s, momentum);
                 break;
             case (RIGHT_ARROW):
                 printf("RIGHT\n");
+                swinger_t *s2 = key_aux_get_swinger2(key_handler_aux);
+                double momentum2 = -1 * held_time * MOMENTUM_CONSTANT;
+                swinger_add_momentum(s2, momentum2);
                 break;
         }
     }
@@ -70,6 +78,7 @@ int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
+    // TODO: remove magic numbers
     swinger_t *s1 = swinger_init((vector_t){380, 150}, 11*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
     swinger_t *s2 = swinger_init((vector_t){620, 150}, 7*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
     list_add(swingers, s1);
@@ -84,13 +93,13 @@ int main(){
         double dt = time_since_last_tick();
   	total_time += dt;
 	if (total_time > 1){
-                swinger_add_momentum(s1, 20);
-                swinger_add_momentum(s2, -20);
-                printf("ADDING MOMENTUM\n");
+        //swinger_add_momentum(s1, 20);
+        //swinger_add_momentum(s2, -20);
+        //printf("ADDING MOMENTUM\n");
 		total_time = 0;
-        }
-        printf("TORQUE: %f\n", swinger_get_torque(s1));
-        printf("MOMENTUM: %f\n", swinger_get_momentum(s2));
+    }
+        //printf("TORQUE: %f\n", swinger_get_torque(s1));
+        //printf("MOMENTUM: %f\n", swinger_get_momentum(s2));
 
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);

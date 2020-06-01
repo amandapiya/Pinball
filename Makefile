@@ -27,6 +27,7 @@ STUDENT_LIBS = vector list \
 	aux force_storage \
 	forces \
 	color \
+	key_handler_aux \
 	demo_util
 
 STUDENT_TESTS = $(subst .c,, $(subst tests/student/,,$(wildcard tests/student/*.c)))
