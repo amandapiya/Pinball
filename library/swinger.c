@@ -11,12 +11,14 @@
 
 const int RADIUS = 20;
 const double INCREMENT = 0.1;
-const int SWINGER_MASS = 20;
+const int SWINGER_MASS = 100;
+const int GRAVITY = 10;
 
 typedef struct swinger {
     list_t *shape;
     rgb_color_t color;
     vector_t center;
+    double start_angle;
     double angle;
     double length; // distance from swinger center to outer point
     double torque;
@@ -56,6 +58,7 @@ swinger_t *swinger_init(vector_t center, double angle, double length, rgb_color_
     new->center = center;
     new->angle =  angle;
     new->length = length;
+    new->start_angle = angle;
     new->torque = 0;
     new->force = VEC_ZERO;
     new->momentum = 0;
@@ -112,9 +115,24 @@ void swinger_add_momentum(swinger_t *swinger, double m){
 
 void swinger_tick(swinger_t *swinger, double dt){
     double rotation_angle = dt * swinger->torque;
-    free(swinger->shape);
     swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
-    swinger->momentum = 0;
-    swinger->angle = swinger->angle + rotation_angle;
-    swinger->shape = make_shape(swinger->center, swinger->angle + rotation_angle, swinger->length);
+
+    if (rotation_angle > EPSILON){ // if torque is not zero
+        swinger->momentum = 0;
+        swinger->angle = swinger->angle + rotation_angle;
+        if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far
+            free(swinger->shape);
+            swinger->shape = make_shape(swinger->center, swinger->start_angle + M_PI/2, swinger->length);
+        }
+        else {
+            free(swinger->shape);
+            swinger->shape = make_shape(swinger->center, swinger->angle + rotation_angle, swinger->length);
+        }
+    }
+
+    // create momentum to move swinger back to original position
+    if (fabs(swinger->angle - swinger->start_angle) > INCREMENT){
+        double gravity_momentum = GRAVITY * (fabs(swinger->start_angle - swinger->angle));
+        swinger_add_momentum(swinger, gravity_momentum);
+    }
 }
