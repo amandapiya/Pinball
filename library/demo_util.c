@@ -64,14 +64,9 @@ body_t *make_trapezoid(double width, double height, double spacing, double slope
     *v = (vector_t) {slope * spacing, -1 * spacing};
     list_add(rect, v);
 
-    double mass = MASS;
+    double mass = INFINITY;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    if (player == 1){
-      *aux = (body_aux_t){false, false, false};
-      mass = INFINITY;
-    }else{
-      *aux = (body_aux_t) {false, false, false};
-    }
+    *aux = (body_aux_t){false, false, false};
     return body_init_with_info(rect, mass, color, aux, free);
 }
 
