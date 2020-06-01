@@ -164,13 +164,6 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
 }
 
 void reset_game(scene_t *scene){
-    //is it possible to just free these objects? not free scene setup
-}
-
-int main(){
-    sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
-    scene_t *scene = scene_init();
-    
     // add ball
     rgb_color_t ball_color = (rgb_color_t) {0.50, 0.50, 0.50};
     double ball_mass = 5.0;
@@ -179,6 +172,15 @@ int main(){
     vector_t ball_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + 10}    ;
     body_set_centroid(ball, ball_start_pos);
     scene_add_body(scene, ball);
+}
+
+int main(){
+    sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
+    scene_t *scene = scene_init();
+    
+
+    make_pinball_border(scene);
+    make_score_template(scene);
 
 
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
@@ -189,8 +191,6 @@ int main(){
     list_add(swingers, s2);
     double total_time = 0.0;
 
-    make_pinball_border(scene);
-    make_score_template(scene);
     reset_game(scene);
     sdl_on_key(on_key);
 
