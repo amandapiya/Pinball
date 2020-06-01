@@ -12,7 +12,7 @@
 const int RADIUS = 20;
 const double INCREMENT = 0.1;
 const double SWING_EPSILON = 0.01;
-const int SWINGER_MASS = 10;
+const int SWINGER_MASS = 3;
 const int GRAVITY = 10;
 
 typedef struct swinger {
@@ -115,22 +115,24 @@ void swinger_add_momentum(swinger_t *swinger, double m){
 }
 
 void swinger_tick(swinger_t *swinger, double dt){
-    double rotation_angle = dt * swinger->torque;
     swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
+    double rotation_angle = dt * swinger->torque;
     swinger->momentum = 0;
 
-    if (fabs(rotation_angle) > SWING_EPSILON){ // if torque is not zero
-        swinger->angle = swinger->angle + rotation_angle;
+    if (fabs(rotation_angle) > 0){ // if torque is not zero
         if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far
             free(swinger->shape);
             if (swinger->angle < swinger->start_angle){
+                swinger->shape = swinger->start_angle - M_PI/2;
                 swinger->shape = make_shape(swinger->center, swinger->start_angle - M_PI/2, swinger->length);
             }
             else {
+                swinger->shape = swinger->start_angle + M_PI/2;
                 swinger->shape = make_shape(swinger->center, swinger->start_angle + M_PI/2, swinger->length);
             }        
         }
         else {
+            swinger->angle = swinger->angle + rotation_angle;
             free(swinger->shape);
             swinger->shape = make_shape(swinger->center, swinger->angle + rotation_angle, swinger->length);
         }
