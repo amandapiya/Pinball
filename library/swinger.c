@@ -118,16 +118,15 @@ void swinger_tick(swinger_t *swinger, double dt){
     swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
     double rotation_angle = dt * swinger->torque;
     swinger->momentum = 0;
-
-    if (fabs(rotation_angle) > 0){ // if torque is not zero
-        // prevent swinger from going down past starting angle
-        if ((swinger->start_angle > 3*M_PI/2 && swinger->angle < 11*M_PI/6) ||
-             (swinger->start_angle < 3*M_PI/2 && swinger->angle > 7*M_PI/6)){ // left swinger
-            swinger->angle = swinger->start_angle;
-            free(swinger->shape);
-            swinger->shape = make_shape(swinger->center, swinger->start_angle, swinger->length);
-        }
-        else if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far up
+    if ((fabs(swinger->start_angle - 11*M_PI/6) < SWING_EPSILON && swinger->angle < 11*M_PI/6) ||
+         (fabs(swinger->start_angle - 7*M_PI/6) < SWING_EPSILON && swinger->angle > 7*M_PI/6)){ // left swinger
+        swinger->torque = 0;
+        swinger->angle = swinger->start_angle;
+        free(swinger->shape);
+        swinger->shape = make_shape(swinger->center, swinger->start_angle, swinger->length);
+    }
+    else if (fabs(rotation_angle) > 0){ // if torque is not zero
+        if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far up
             free(swinger->shape);
             if (swinger->angle < swinger->start_angle){
                 swinger->angle = swinger->start_angle - M_PI/2;
@@ -147,7 +146,7 @@ void swinger_tick(swinger_t *swinger, double dt){
 
     // create momentum to move swinger back to original position
     if (fabs(swinger->angle - swinger->start_angle) > INCREMENT){
-        double gravity_momentum = GRAVITY * swinger->start_angle - swinger->angle;
+        double gravity_momentum = GRAVITY * pow(swinger->start_angle - swinger->angle, 3);
         swinger_add_momentum(swinger, gravity_momentum);
     }
 }
