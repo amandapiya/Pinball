@@ -12,8 +12,8 @@
 const int RADIUS = 20;
 const double INCREMENT = 0.1;
 const double SWING_EPSILON = 0.01;
-const int SWINGER_MASS = 100;
-const int GRAVITY = 100;
+const int SWINGER_MASS = 10;
+const int GRAVITY = 10;
 
 typedef struct swinger {
     list_t *shape;
@@ -123,7 +123,12 @@ void swinger_tick(swinger_t *swinger, double dt){
         swinger->angle = swinger->angle + rotation_angle;
         if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far
             free(swinger->shape);
-            swinger->shape = make_shape(swinger->center, swinger->start_angle + M_PI/2, swinger->length);
+            if (swinger->angle < swinger->start_angle){
+                swinger->shape = make_shape(swinger->center, swinger->start_angle - M_PI/2, swinger->length);
+            }
+            else {
+                swinger->shape = make_shape(swinger->center, swinger->start_angle + M_PI/2, swinger->length);
+            }        
         }
         else {
             free(swinger->shape);
