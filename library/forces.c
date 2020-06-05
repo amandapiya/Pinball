@@ -127,13 +127,13 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
         (void*) physics_vars, (free_func_t) aux_free);
 }
 
-void create_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball){
+void temp_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball){
     collision_info_t *c_info = find_collision(swinger_get_shape(swinger), body_get_shape(ball)); // maybe switch order
     if (c_info->collided == true){
         printf("COLLISION\n");
-        double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
-        double swinger_dot = swinger_get_torque(swinger) * 1; // maybe change value
-        double impulse = (-1) * body_get_mass(ball) * (elasticity) * 10; // (player_dot - swinger_dot); // last term..
-        body_add_impulse(ball, vec_multiply(impulse, c_info->axis));
+        // double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
+        // double swinger_dot = swinger_get_torque(swinger) * 1; // maybe change value
+        // double impulse = (-1) * 100 * (elasticity); // (player_dot - swinger_dot); // last term..
+        body_add_impulse(ball, vec_multiply(50, c_info->axis));
     }
 }
