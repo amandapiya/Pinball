@@ -97,8 +97,8 @@ void make_pinball_border(scene_t *scene){
 
     list_t *pinball_border = list_init(1, (free_func_t) body_free);
     //TODO: add collisions with ball
-    
-    
+
+
     // Sets up pinball border
     body_t *border1 = make_box(SPACING, BOARD_SPEC.y, COLOR_INIT, 0);
     body_t *border2 = make_box(BOARD_SPEC.x, SPACING, COLOR_INIT, 0);
@@ -112,7 +112,7 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, border2);
     list_add(pinball_border, border3);
     list_add(pinball_border, border4);
-    
+
     // Sets up ball alley
     body_t *alley1 = make_box(SPACING, ALLEY_SPEC.y, COLOR_INIT, 0);
     body_t *alley2 = make_box(ALLEY_SPEC.x, SPACING, COLOR_INIT, 0);
@@ -163,7 +163,7 @@ void make_pinball_border(scene_t *scene){
     body_t *losing_area = make_box(LOSING_SPEC.x, LOSING_SPEC.y, COLOR_INIT, 0);
     body_set_centroid(losing_area, CONE_POINT);
     list_add(pinball_border, losing_area);
-    
+
     for (size_t i = 0; i < list_size(pinball_border); i++){
         body_t *b = list_get(pinball_border, i);
         scene_add_body(scene, b);
@@ -191,11 +191,11 @@ void spring_bounds(scene_t *scene){
             vector_t gravity_center = {.x = MAX_X / 2, .y = -R};
             body_set_centroid(grav, gravity_center);
             scene_add_body(scene, grav);
-            create_newtonian_gravity(scene, G, ball, grav);  
+            create_newtonian_gravity(scene, G, ball, grav);
 
 //            body_set_velocity(ball, (vector_t) {0.0, -15.0});
-        } 
-        else if (added_grav == true){    
+        }
+        else if (added_grav == true){
             vector_t temp_v = body_get_velocity(ball);
             temp_v.y -= 1;
             body_set_velocity(ball, temp_v);
@@ -213,7 +213,7 @@ void spring_fling(void *key_handler_aux){
     // spring anchor
     body_t *spring = key_aux_get_spring(key_handler_aux);
     scene_t *scene = key_aux_get_scene(key_handler_aux);
-    
+
     body_set_velocity(spring, VEC_ZERO);
 
     body_t *anchor = make_circle(5.0, 0, 2 * M_PI, BALL_COLOR, INFINITY, 0);
@@ -245,7 +245,7 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
                 break;
         }
         double time_divisions = 11;
-        body_tick(spring, held_time / time_divisions); 
+        body_tick(spring, held_time / time_divisions);
     }
     else if (type == KEY_RELEASED){
         switch (key) {
@@ -266,9 +266,9 @@ void reset_game(scene_t *scene){
     // add ball
     double ball_mass = 1.0;
     double ball_error = 30.0;
-    body_t *ball = make_circle(ALLEY_SPEC.x / 2 - ball_error, 0, 2 * M_PI, 
+    body_t *ball = make_circle(ALLEY_SPEC.x / 2 - ball_error, 0, 2 * M_PI,
         BALL_COLOR, ball_mass, 1.0);
-    body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT})); 
+    body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT}));
     scene_add_body(scene, ball);
 
     // add spring
@@ -276,7 +276,7 @@ void reset_game(scene_t *scene){
     rgb_color_t spring_color = (rgb_color_t) {0.41, 0.41, 0.41};
     body_t *spring = make_box(ALLEY_SPEC.x - 5.0, spring_height,
         spring_color, 1);
-    vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + 
+    vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y +
         BALL_HEIGHT - (ALLEY_SPEC.x / 2 - ball_error) - (spring_height / 2)};
     body_set_centroid(spring, spring_start_pos);
     scene_add_body(scene, spring);
@@ -288,7 +288,7 @@ int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
     reset_game(scene);
-    
+
     make_pinball_border(scene);
     make_score_template(scene);
 
@@ -299,13 +299,15 @@ int main(){
     list_add(swingers, s1);
     list_add(swingers, s2);
     double total_time = 0.0;
-
+    body_t *ball = get_player(scene);
     sdl_on_key(on_key);
     body_t *spring = get_spring(scene);
 
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
+        create_swinger_collision(scene, 1.0, s1, ball);
+        create_swinger_collision(scene, 1.0, s2, ball);
         if (total_time > 1){
             //swinger_add_momentum(s1, 20);
             //swinger_add_momentum(s2, -20);
@@ -315,7 +317,7 @@ int main(){
         //printf("TORQUE: %f\n", swinger_get_torque(s1));
         //printf("MOMENTUM: %f\n", swinger_get_momentum(s2));
 
-	
+
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);
         scene_tick(scene, dt);

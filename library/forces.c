@@ -8,6 +8,7 @@
 #include "collision.h"
 #include "body_aux.h"
 #include "color.h"
+#include "swinger.h"
 #include "collision_storage.h"
 
 const double TOO_CLOSE_GRAV = 5.0;
@@ -22,7 +23,7 @@ void gravity_force(aux_t *aux){
     vector_t r2minus1= vec_subtract(body_get_centroid(body2), body_get_centroid(body1));
     double r12 = sqrt(vec_dot(r2minus1, r2minus1));
     vector_t r = vec_multiply(1.0 / r12, r2minus1);
-    
+
     if (r12 > TOO_CLOSE_GRAV){
         // define how close we want bodies to be for force to be ignored
         vector_t F21 = vec_multiply((-G * m1 * m2 / (r12 * r12)), r);
@@ -88,13 +89,13 @@ void physics_collision(body_t *body1, body_t *body2, vector_t axis, void *aux) {
 void collision(void *collision_storage){
     body_t *body1 = collision_storage_get_body1(collision_storage);
     body_t *body2 = collision_storage_get_body2(collision_storage);
-    
+
     collision_info_t *collision = find_collision(body_get_shape(body1), body_get_shape(body2));
     if (collision->collided){
         if (!get_prev_collision(collision_storage)){
             collision_handler_t handler = (collision_handler_t) collision_storage_get_handler(collision_storage);
             handler(body1, body2,collision->axis, collision_storage_get_aux(collision_storage));
-            set_prev_collision(collision_storage, true); 
+            set_prev_collision(collision_storage, true);
         }
         else{
             set_prev_collision(collision_storage, false);
@@ -124,4 +125,15 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
     aux_t *physics_vars = aux_init(elasticity, body1, body2);
     create_collision(scene, body1, body2, (collision_handler_t) physics_collision,
         (void*) physics_vars, (free_func_t) aux_free);
+}
+
+void create_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball){
+    collision_info_t *c_info = find_collision(swinger_get_shape(swinger), body_get_shape(ball)); // maybe switch order
+    if (c_info->collided == true){
+        printf("COLLISION\n");
+        double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
+        double swinger_dot = swinger_get_torque(swinger) * 1; // maybe change value
+        double impulse = body_get_mass(ball) * (1 + elasticity) * (player_dot - swinger_dot); // last term..
+        body_add_impulse(ball, vec_multiply(impulse, c_info->axis));
+    }
 }
