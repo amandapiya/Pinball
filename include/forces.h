@@ -4,7 +4,6 @@
 #include "scene.h"
 #include "color.h"
 #include "collision_storage.h"
-#include "swinger.h"
 
 /**
  * A function called when a collision occurs.
@@ -111,8 +110,11 @@ void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2);
  * @param body1 the first body
  * @param body2 the second body
  */
-void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, body_t *body2);
-
-void create_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball);
+void create_physics_collision(
+    scene_t *scene,
+    double elasticity,
+    body_t *body1,
+    body_t *body2
+);
 
 #endif // #ifndef __FORCES_H__
