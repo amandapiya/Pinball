@@ -167,7 +167,7 @@ void make_pinball_border(scene_t *scene){
     for (size_t i = 0; i < list_size(pinball_border); i++){
         body_t *b = list_get(pinball_border, i);
         scene_add_body(scene, b);
-        create_physics_collision(scene, 0.75, ball, b);
+        create_physics_collision(scene, 1, ball, b);
     }
 }
 
