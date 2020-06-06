@@ -70,22 +70,6 @@ void swinger_set_color(swinger_t *swinger, rgb_color_t new_color);
 void swinger_set_torque(swinger_t *swinger, double t);
 
 /**
- * Changes a swinger's orientation in the plane.
- * The swinger is modified so it points towards the given angle.
- */
-// void swinger_set_angle(swinger_t *swinger, double angle);
-
-/**
- * Applies a force to a swinger over the current tick.
- * If multiple forces are applied in the same tick, they should be added.
- * Should not change the swinger's position or velocity; see swinger_tick().
- *
- * @param swinger a pointer to a swinger returned from swinger_init()
- * @param force the force vector to apply
- */
-void swinger_add_force(swinger_t *swinger, vector_t force);
-
-/**
  * Applies an angular momentum to a swinger.
  * An angular momentum causes an instantaneous change in torque
  */

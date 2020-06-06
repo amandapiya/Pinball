@@ -13,6 +13,10 @@
 
 const double TOO_CLOSE_GRAV = 5.0;
 const float COLOR_UPDATE = 0.1;
+// number of times find collision must return false before another collision with a wall can occur
+const double COLLISION_TRACKER = 5;
+const double SWINGER_COLLISION_TRACKER = 3;
+const double SWINGER_IMPULSE_MULTIPLIER = 0.7;
 
 void gravity_force(aux_t *aux){
     double G = aux_get_constant(aux);
@@ -22,7 +26,7 @@ void gravity_force(aux_t *aux){
     double m2 = body_get_mass(body2);
     vector_t r2minus1= vec_subtract(body_get_centroid(body2), body_get_centroid(body1));
     double r12 = sqrt(vec_dot(r2minus1, r2minus1));
-    vector_t r = vec_multiply(1.0 / r12, r2minus1);
+    vector_t r = vec_multiply(1/r12, r2minus1);
 
     if (r12 > TOO_CLOSE_GRAV){
         // define how close we want bodies to be for force to be ignored
@@ -92,10 +96,9 @@ void collision(void *collision_storage){
 
     collision_info_t *collision = find_collision(body_get_shape(body1), body_get_shape(body2));
     if (collision->collided){
-        // if collision, add 3 to tracker count
+        // checks that a collision has not recently happened
         if (get_collision_tracker(collision_storage) == 0){
-            // do collision
-            set_collision_tracker(collision_storage, 5);
+            set_collision_tracker(collision_storage, COLLISION_TRACKER);
             collision_handler_t handler = (collision_handler_t) collision_storage_get_handler(collision_storage);
             handler(body1, body2,collision->axis, collision_storage_get_aux(collision_storage));
             set_prev_collision(collision_storage, true);
@@ -103,31 +106,20 @@ void collision(void *collision_storage){
         else {
             set_collision_tracker(collision_storage, get_collision_tracker(collision_storage) - 1);
         }
-        /*if (!get_prev_collision(collision_storage)){
-            collision_handler_t handler = (collision_handler_t) collision_storage_get_handler(collision_storage);
-            handler(body1, body2,collision->axis, collision_storage_get_aux(collision_storage));
-            set_prev_collision(collision_storage, true);
-        }
-        else{
-            set_prev_collision(collision_storage, false);
-        }*/
     }
     else if (get_collision_tracker(collision_storage) > 0){
-        // subtract one from tracker count if no collision
         set_collision_tracker(collision_storage, get_collision_tracker(collision_storage) - 1);
     }
 }
 
-
 // general function -- handlers are functions
 void create_collision(scene_t *scene, body_t *body1, body_t *body2, collision_handler_t handler, void *aux, free_func_t freer) {
-    list_t *bodies = list_init(2, (free_func_t) body_free);
+    list_t *bodies = list_init(1, (free_func_t) body_free);
     list_add(bodies, body1);
     list_add(bodies, body2);
 
     collision_storage_t *col_stor = collision_storage_init(aux, body1, body2, handler, freer);
     scene_add_bodies_force_creator(scene, (force_creator_t) collision, (void*) col_stor, bodies, (free_func_t) collision_storage_free);
-
 }
 
 // calls create_collision with destructive_collision as handler
@@ -146,11 +138,11 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
 void temp_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball, int *counter){
     collision_info_t *c_info = find_collision(body_get_shape(ball), swinger_get_shape(swinger));
     if (c_info->collided == true && *counter == 0){
-        *counter += 3; // update collision tracker
+        *counter += SWINGER_COLLISION_TRACKER;
         double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
         double swinger_dot = (vec_dot((vector_t){swinger_get_momentum(swinger), swinger_get_momentum(swinger)}, c_info->axis));
         double impulse = ((1 + elasticity) * (swinger_dot - player_dot));
-        body_add_impulse(ball, vec_multiply(0.7 * impulse, c_info->axis));
+        body_add_impulse(ball, vec_multiply(SWINGER_IMPULSE_MULTIPLIER * impulse, c_info->axis));
     }
     else if (*counter > 0){
         *counter -= 1;

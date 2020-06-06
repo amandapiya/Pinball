@@ -57,6 +57,14 @@ const double G = 6.67E11;
 const double M = 6E24;
 const double g = 100; // CHANGED
 
+const double SWINGER_ELASTICITY = 2;
+const double SWINGER_HEIGHT = 150;
+const double LEFT_SWINGER_POS = 380;
+const double RIGHT_SWINGER_POS = 620;
+const double SWINGER_LENGTH = 110;
+const double LEFT_SWINGER_ANG = 11*M_PI/6;
+const double RIGHT_SWINGER_ANG = 7*M_PI/6;
+
 bool flung = false;
 bool added_grav = false;
 
@@ -293,9 +301,8 @@ int main(){
     make_score_template(scene);
 
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
-    // TODO: remove magic numbers
-    swinger_t *s1 = swinger_init((vector_t){380, 150}, 11*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
-    swinger_t *s2 = swinger_init((vector_t){620, 150}, 7*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
+    swinger_t *s1 = swinger_init((vector_t){LEFT_SWINGER_POS, SWINGER_HEIGHT}, LEFT_SWINGER_ANG, SWINGER_LENGTH, (rgb_color_t){1.0, 0, 0});
+    swinger_t *s2 = swinger_init((vector_t){RIGHT_SWINGER_POS, SWINGER_HEIGHT}, RIGHT_SWINGER_ANG, SWINGER_LENGTH, (rgb_color_t){1.0, 0, 0});
     list_add(swingers, s1);
     list_add(swingers, s2);
     int *sw1counter = malloc(sizeof(int));
@@ -310,11 +317,9 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
-	//swinger_tick(s1, dt);
-        //swinger_tick(s2, dt);
 
-        temp_swinger_collision(scene, 2.0, s1, ball, sw1counter);
-        temp_swinger_collision(scene, 2.0, s2, ball, sw2counter);
+        temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
+        temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);
 

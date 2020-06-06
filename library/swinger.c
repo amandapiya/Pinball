@@ -14,6 +14,12 @@ const double INCREMENT = 0.1;
 const double SWING_EPSILON = 0.01;
 const int SWINGER_MASS = 3;
 const int GRAVITY = 10;
+const int SEMICIRCLE_MIN = M_PI/2;
+const int SEMICIRCLE_MAX = 3*M_PI/2;
+const int LEFT_SWINGER_ANGLE = 11*M_PI/6;
+const int RIGHT_SWINGER_ANGLE = 7*M_PI/6;
+const int MOMENTUM_EXPONENT = 3;
+const int QUARTER_ANGLE = M_PI/2;
 
 typedef struct swinger {
     list_t *shape;
@@ -38,8 +44,8 @@ list_t *make_shape(vector_t center, double angle, double length){
     list_add(vertices, point);
     free(vertex_add);
     // makes semi-circle
-    double theta = angle + M_PI/2;
-    while (theta < angle + 3*M_PI/2){
+    double theta = angle + SEMICIRCLE_MIN;
+    while (theta < angle + SEMICIRCLE_MAX){
         vector_t *vertex_add = malloc(sizeof(vector_t));
         vertex_add->x = cos(theta) * RADIUS;
         vertex_add->y = sin(theta) * RADIUS;
@@ -64,7 +70,6 @@ swinger_t *swinger_init(vector_t center, double angle, double length, rgb_color_
     new->force = VEC_ZERO;
     new->momentum = 0;
     new->shape = make_shape(center, angle, length);
-
     return new;
 }
 
@@ -106,9 +111,6 @@ void swinger_set_color(swinger_t *swinger, rgb_color_t new_color){
 void swinger_set_torque(swinger_t *swinger, double t){
     swinger->torque = t;
 }
-void swinger_add_force(swinger_t *swinger, vector_t force){
-    // Not sure if needed, maybe remove
-}
 
 void swinger_add_momentum(swinger_t *swinger, double m){
     swinger->momentum += m;
@@ -118,35 +120,35 @@ void swinger_tick(swinger_t *swinger, double dt){
     swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
     double rotation_angle = dt * swinger->torque;
     swinger->momentum = 0;
-    if ((fabs(swinger->start_angle - 11*M_PI/6) < SWING_EPSILON && swinger->angle < 11*M_PI/6) ||
-         (fabs(swinger->start_angle - 7*M_PI/6) < SWING_EPSILON && swinger->angle > 7*M_PI/6)){ // left swinger
+    if ((fabs(swinger->start_angle - LEFT_SWINGER_ANGLE) < SWING_EPSILON && swinger->angle < LEFT_SWINGER_ANGLE) ||
+         (fabs(swinger->start_angle - RIGHT_SWINGER_ANGLE) < SWING_EPSILON && swinger->angle > RIGHT_SWINGER_ANGLE)){ // left swinger
         swinger->torque = 0;
         swinger->angle = swinger->start_angle;
-        free(swinger->shape);
+        list_free(swinger->shape);
         swinger->shape = make_shape(swinger->center, swinger->start_angle, swinger->length);
     }
     else if (fabs(rotation_angle) > 0){ // if torque is not zero
-        if (fabs(swinger->angle - swinger->start_angle) > M_PI/2){ // if swinger has moved too far up
-            free(swinger->shape);
+        if (fabs(swinger->angle - swinger->start_angle) > QUARTER_ANGLE){ // if swinger has moved too far up
+            list_free(swinger->shape);
             if (swinger->angle < swinger->start_angle){
-                swinger->angle = swinger->start_angle - M_PI/2;
-                swinger->shape = make_shape(swinger->center, swinger->start_angle - M_PI/2, swinger->length);
+                swinger->angle = swinger->start_angle - QUARTER_ANGLE;
+                swinger->shape = make_shape(swinger->center, swinger->start_angle - QUARTER_ANGLE, swinger->length);
             }
             else {
-                swinger->angle = swinger->start_angle + M_PI/2;
-                swinger->shape = make_shape(swinger->center, swinger->start_angle + M_PI/2, swinger->length);
+                swinger->angle = swinger->start_angle + QUARTER_ANGLE;
+                swinger->shape = make_shape(swinger->center, swinger->start_angle + QUARTER_ANGLE, swinger->length);
             }
         }
         else { // regular swing
             swinger->angle = swinger->angle + rotation_angle;
-            free(swinger->shape);
+            list_free(swinger->shape);
             swinger->shape = make_shape(swinger->center, swinger->angle + rotation_angle, swinger->length);
         }
     }
 
     // create momentum to move swinger back to original position
     if (fabs(swinger->angle - swinger->start_angle) > INCREMENT){
-        double gravity_momentum = GRAVITY * pow(swinger->start_angle - swinger->angle, 3);
+        double gravity_momentum = GRAVITY * pow(swinger->start_angle - swinger->angle, MOMENTUM_EXPONENT);
         swinger_add_momentum(swinger, gravity_momentum);
     }
 }
