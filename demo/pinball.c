@@ -50,6 +50,7 @@ const vector_t WALL_HEIGHT = {245, 260};
 const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {0.50, 0.50, 0.50};
+const double BALL_ERROR = 30;
 
 const double BALL_HEIGHT = 65.0;
 // Grav constants
@@ -105,7 +106,6 @@ void make_pinball_border(scene_t *scene){
 
     list_t *pinball_border = list_init(1, (free_func_t) body_free);
     //TODO: add collisions with ball
-
 
     // Sets up pinball border
     body_t *border1 = make_box(SPACING, BOARD_SPEC.y, COLOR_INIT, 0);
@@ -273,8 +273,7 @@ void reset_game(scene_t *scene){
 
     // add ball
     double ball_mass = 1.0;
-    double ball_error = 30.0;
-    body_t *ball = make_circle(ALLEY_SPEC.x / 2 - ball_error, 0, 2 * M_PI,
+    body_t *ball = make_circle(ALLEY_SPEC.x / 2 - BALL_ERROR, 0, 2 * M_PI,
         BALL_COLOR, ball_mass, 1.0);
     body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT}));
     scene_add_body(scene, ball);
@@ -285,7 +284,7 @@ void reset_game(scene_t *scene){
     body_t *spring = make_box(ALLEY_SPEC.x - 5.0, spring_height,
         spring_color, 1);
     vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y +
-        BALL_HEIGHT - (ALLEY_SPEC.x / 2 - ball_error) - (spring_height / 2)};
+        BALL_HEIGHT - (ALLEY_SPEC.x / 2 - BALL_ERROR) - (spring_height / 2)};
     body_set_centroid(spring, spring_start_pos);
     scene_add_body(scene, spring);
 
@@ -328,6 +327,14 @@ int main(){
         }
         scene_tick(scene, dt);
         spring_bounds(scene);
+
+        // check if life lost
+        if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2 - BALL_ERROR){
+            body_free(ball);
+            printf("GAME OVER\n");
+            break; // REPLACE LATER
+        }
+
         sdl_render_scene(scene, swingers);
     }
     swinger_free(s1);
