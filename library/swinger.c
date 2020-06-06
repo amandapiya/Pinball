@@ -74,7 +74,6 @@ void swinger_free(swinger_t *swinger){
 }
 
 list_t *swinger_get_shape(swinger_t *swinger){
-    /*
     list_t *copy = list_init(list_size(swinger->shape), free);
     for (size_t i = 0; i < list_size(swinger->shape); i++) {
         vector_t *v = malloc(sizeof(vector_t));
@@ -82,8 +81,6 @@ list_t *swinger_get_shape(swinger_t *swinger){
         list_add(copy, v);
     }
     return copy;
-    */
-    return swinger->shape;
 }
 
 vector_t swinger_get_center(swinger_t *swinger){
