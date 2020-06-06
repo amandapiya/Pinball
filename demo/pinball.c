@@ -298,6 +298,10 @@ int main(){
     swinger_t *s2 = swinger_init((vector_t){620, 150}, 7*M_PI/6, 110, (rgb_color_t){1.0, 0, 0});
     list_add(swingers, s1);
     list_add(swingers, s2);
+    int *sw1counter = malloc(sizeof(int));
+    int *sw2counter = malloc(sizeof(int));
+    *sw1counter = 0;
+    *sw2counter = 0;
     double total_time = 0.0;
     body_t *ball = get_player(scene);
     sdl_on_key(on_key);
@@ -306,11 +310,11 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
-	swinger_tick(s1, dt);
+	    swinger_tick(s1, dt);
         swinger_tick(s2, dt);
 
-        temp_swinger_collision(scene, 2.0, s1, ball);
-        temp_swinger_collision(scene, 2.0, s2, ball);
+        temp_swinger_collision(scene, 2.0, s1, ball, sw1counter);
+        temp_swinger_collision(scene, 2.0, s2, ball, sw2counter);
         if (total_time > 1){
             total_time = 0;
         }
@@ -320,5 +324,7 @@ int main(){
     }
     swinger_free(s1);
     swinger_free(s2);
+    free(sw1counter);
+    free(sw2counter);
     scene_free(scene);
   }

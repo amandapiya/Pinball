@@ -127,26 +127,29 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
         (void*) physics_vars, (free_func_t) aux_free);
 }
 
-void temp_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball){
+void temp_swinger_collision(scene_t *scene, double elasticity, swinger_t *swinger, body_t *ball, int *counter){
     // printf("made collision\n");
-    list_t *triangle = list_init(1, NULL);
-    list_add(triangle, list_get(swinger_get_shape(swinger), 0));
-    list_add(triangle, list_get(swinger_get_shape(swinger), 1));
-    list_add(triangle, list_get(swinger_get_shape(swinger), list_size(swinger_get_shape(swinger)) - 1));
-    collision_info_t *testc = find_collision(triangle, body_get_shape(ball));
-    if (testc->collided == true){
-       //  printf("triangle collision\n");
-    }
-
+    //list_t *triangle = list_init(1, NULL);
+    //list_add(triangle, list_get(swinger_get_shape(swinger), 0));
+    //list_add(triangle, list_get(swinger_get_shape(swinger), 1));
+    //list_add(triangle, list_get(swinger_get_shape(swinger), list_size(swinger_get_shape(swinger)) - 1));
+    //collision_info_t *testc = find_collision(triangle, body_get_shape(ball));
+    //if (testc->collided == true){
+       //  printf("triangle collision\n");}
+    //
     collision_info_t *c_info = find_collision(body_get_shape(ball), swinger_get_shape(swinger)); // maybe switch order
-    if (c_info->collided == true){
+    if (c_info->collided == true && *counter == 0){
         // printf("COLLISION\n");
+        *counter += 3; // update collision tracker
         printf("x: %f, y: %f\n", c_info->axis.x, c_info->axis.y);
         double player_dot = vec_dot(body_get_velocity(ball), c_info->axis);
         double swinger_dot = vec_dot((vector_t){swinger_get_momentum(swinger), swinger_get_momentum(swinger)}, c_info->axis); // maybe change value
         double impulse = .5 *  (1 + elasticity) * (swinger_dot - player_dot);// last term..
         body_add_impulse(ball, vec_multiply(impulse, c_info->axis));
     }
-    free(testc);
+    else {
+        *counter -= 3;
+    }
+    //free(testc);
     free(c_info);
 }
