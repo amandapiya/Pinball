@@ -92,14 +92,26 @@ void collision(void *collision_storage){
 
     collision_info_t *collision = find_collision(body_get_shape(body1), body_get_shape(body2));
     if (collision->collided){
-        if (!get_prev_collision(collision_storage)){
+        // if collision, add 3 to tracker count
+        if (get_collision_tracker(collision_storage) == 0){
+            // do collision
+            set_collision_tracker(collision_storage, get_collision_tracker(collision_storage) + 3);
+            collision_handler_t handler = (collision_handler_t) collision_storage_get_handler(collision_storage);
+            handler(body1, body2,collision->axis, collision_storage_get_aux(collision_storage));
+            set_prev_collision(collision_storage, true);
+        }
+        /*if (!get_prev_collision(collision_storage)){
             collision_handler_t handler = (collision_handler_t) collision_storage_get_handler(collision_storage);
             handler(body1, body2,collision->axis, collision_storage_get_aux(collision_storage));
             set_prev_collision(collision_storage, true);
         }
         else{
             set_prev_collision(collision_storage, false);
-        }
+        }*/
+    }
+    else if (get_collision_tracker(collision_storage) > 1){
+        // subtract one from tracker count if no collision
+        set_collision_tracker(collision_storage, get_collision_tracker(collision_storage) - 1);
     }
 }
 
