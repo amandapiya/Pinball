@@ -36,6 +36,7 @@ int main(){
 
     swinger_t *s = swinger_init((vector_t){300, 300}, M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
     body_t *star = make_star(6, 100, (vector_t){500, 500},(rgb_color_t){1.0, 0, 1.0});
+    body_t *acc = make_accelerator(30, 10, (vector_t){100, 100}, (rgb_color_t){1.0, 0, 1.0});
 
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
@@ -45,6 +46,7 @@ int main(){
         //sdl_render_scene(scene);
         sdl_draw_polygon(body_get_shape(star), (rgb_color_t){1.0, 1.0, 0});
         sdl_draw_polygon(swinger_get_shape(s), (rgb_color_t){1.0, 0, 0});
+        sdl_draw_polygon(body_get_shape(acc), (rgb_color_t){1.0, 0, 1.0});
         sdl_show();
     }
     swinger_free(s);

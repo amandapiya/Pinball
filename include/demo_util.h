@@ -17,4 +17,6 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t colo
 
 body_t *make_star(size_t num_arms, size_t rad, vector_t center_V, rgb_color_t color);
 
+body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t color);
+
 #endif // #ifndef __DEMO_UTIL_H__
