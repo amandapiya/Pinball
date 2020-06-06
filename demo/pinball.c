@@ -67,6 +67,7 @@ const double LEFT_SWINGER_ANG = 11*M_PI/6;
 const double RIGHT_SWINGER_ANG = 7*M_PI/6;
 
 bool flung = false;
+bool hit_wall = false;
 bool added_grav = false;
 
 body_t *get_player(scene_t *scene){
@@ -193,6 +194,7 @@ void spring_bounds(scene_t *scene){
         if (added_grav == false){
             printf("ADDING GRAV\n");
             added_grav = true;
+            /*
             // Gravity box !
             double R = sqrt(G * M / g);
             body_t *grav = make_circle(5.0, 0.0, 2 * M_PI, COLOR_INIT, M, 0);
@@ -200,7 +202,7 @@ void spring_bounds(scene_t *scene){
             body_set_centroid(grav, gravity_center);
             scene_add_body(scene, grav);
             create_newtonian_gravity(scene, G, ball, grav);
-
+*/
             //body_set_velocity(ball, (vector_t) {0.0, -3.0});
         }
         else if (added_grav == true){
@@ -325,6 +327,14 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
+        
+        if (polygon_centroid(body_get_shape(ball)).y > 400){
+            hit_wall = true;
+        }
+
+        if (hit_wall == true){
+            body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 5});
+        }
 
         temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
         temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
