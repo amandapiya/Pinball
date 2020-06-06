@@ -28,13 +28,14 @@ const double TIME_DIVISION = 11;
 
 //void swinger_tick(swinger_t s1, swinger_t s2){
 
-    
+
 int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
     double total_time = 0.0;
 
     swinger_t *s = swinger_init((vector_t){300, 300}, M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
+    body_t *star = make_star(6, 100, (vector_t){500, 500},(rgb_color_t){1.0, 0, 1.0});
 
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
@@ -42,9 +43,11 @@ int main(){
         sdl_clear();
         //scene_tick(scene, dt);
         //sdl_render_scene(scene);
+        sdl_draw_polygon(body_get_shape(star), (rgb_color_t){1.0, 1.0, 0});
         sdl_draw_polygon(swinger_get_shape(s), (rgb_color_t){1.0, 0, 0});
         sdl_show();
     }
     swinger_free(s);
+    body_free(star);
     scene_free(scene);
   }

@@ -99,3 +99,29 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad,
     return body_init_with_info(points, mass, color, aux, free);
 }
 
+body_t *make_star(size_t num_arms, size_t rad, vector_t center_V, rgb_color_t color){
+    body_aux_t *aux = malloc(sizeof(body_aux_t));
+    *aux = (body_aux_t){false, false, true};
+    list_t *vertices = list_init(1, free);
+    double angle_between_vertices = M_PI/(num_arms);
+    double theta = 0;
+    double inner_side_ratio = 1/2.5;
+    for (int i = 0; i < num_arms; i++){
+        vector_t *vertex_add = malloc(sizeof(vector_t));
+        vertex_add->x = cos(theta)*rad;
+        vertex_add->y = sin(theta)*rad;
+        vector_t *point = malloc(sizeof(vector_t));
+        *point = vec_add(center_V, *vertex_add);
+        list_add(vertices, point);
+        theta += angle_between_vertices;
+        vertex_add->x = cos(theta)*inner_side_ratio*rad;
+        vertex_add->y = sin(theta)*inner_side_ratio*rad;
+        vector_t *point2 = malloc(sizeof(vector_t));
+        *point2 = vec_add(center_V, *vertex_add);
+        list_add(vertices, point2);
+        free(vertex_add);
+        theta += angle_between_vertices;
+    }
+    body_t *star = body_init_with_info(vertices, INFINITY, color, (void *)aux, free);
+    return star;
+}

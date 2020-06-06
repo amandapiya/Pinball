@@ -63,8 +63,8 @@ const double SWINGER_HEIGHT = 150;
 const double LEFT_SWINGER_POS = 380;
 const double RIGHT_SWINGER_POS = 620;
 const double SWINGER_LENGTH = 110;
-const double LEFT_SWINGER_ANG = 11*M_PI/6;
-const double RIGHT_SWINGER_ANG = 7*M_PI/6;
+const int LEFT_SWINGER_ANG = 11*M_PI/6;
+const int RIGHT_SWINGER_ANG = 7*M_PI/6;
 
 bool flung = false;
 bool added_grav = false;

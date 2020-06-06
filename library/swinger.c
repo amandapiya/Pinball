@@ -16,8 +16,8 @@ const int SWINGER_MASS = 3;
 const int GRAVITY = 10;
 const int SEMICIRCLE_MIN = M_PI/2;
 const int SEMICIRCLE_MAX = 3*M_PI/2;
-const double LEFT_SWINGER_ANGLE = 11*M_PI/6;
-const double RIGHT_SWINGER_ANGLE = 7*M_PI/6;
+const int LEFT_SWINGER_ANGLE = 11*M_PI/6;
+const int RIGHT_SWINGER_ANGLE = 7*M_PI/6;
 const int MOMENTUM_EXPONENT = 3;
 const int QUARTER_ANGLE = M_PI/2;
 
