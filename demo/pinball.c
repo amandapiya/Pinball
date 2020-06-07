@@ -14,6 +14,7 @@
 #include "sdl_wrapper.h"
 #include "collision.h"
 #include "body.h"
+#include "color.h"
 #include "swinger.h"
 #include "key_handler_aux.h"
 #include "demo_util.h"
@@ -27,6 +28,7 @@ const double MAX_X = 1300;
 const double MAX_Y = 650;
 const double TIME_DIVISION = 11;
 const double MOMENTUM_CONSTANT = 10;
+const double MID_X = 500;
 
 const rgb_color_t COLOR_INIT = {0, 0, 0};
 const rgb_color_t INNER_COLOR = {1, 1, 1};
@@ -49,7 +51,7 @@ const vector_t ALLEY_POINT = {900 - 3 + 50/2, MAX_Y/2 - 600/2 + 250/2};
 const vector_t WALL_HEIGHT = {245, 260};
 const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
-const rgb_color_t BALL_COLOR  = {0.50, 0.50, 0.50};
+const rgb_color_t BALL_COLOR  = {0.50, 0, 0.50};
 const double BALL_ERROR = 30;
 
 const double BALL_HEIGHT = 65.0;
@@ -66,9 +68,14 @@ const double SWINGER_LENGTH = 110;
 const double LEFT_SWINGER_ANG = 11*M_PI/6;
 const double RIGHT_SWINGER_ANG = 7*M_PI/6;
 
+const double ACC_WIDTH = 50;
+const double ACC_HEIGHT = 20;
+const double ACC_POS_Y = 250;
+const double ACC_SEPARATION = 30;
+
 bool flung = false;
 bool hit_wall = false;
-bool added_grav = false;
+bool added_grav = false; // REMOVE ALL GRAVITY CODE
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -273,6 +280,14 @@ void reset_game(scene_t *scene){
     flung = false;
     added_grav = false;
 
+    // add accelerators
+    body_t *acc1 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y}, (rgb_color_t) {1.0, 0, 1});
+    scene_add_body(scene, acc1);
+    body_t *acc2 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + ACC_SEPARATION}, (rgb_color_t) {.8, 0, .8});
+    scene_add_body(scene, acc2);
+    body_t *acc3 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + 2 * ACC_SEPARATION}, (rgb_color_t) {.6, 0, .6});
+    scene_add_body(scene, acc3);
+
     // add ball
     double ball_mass = 1.0;
     body_t *ball = make_circle(ALLEY_SPEC.x / 2 - BALL_ERROR, 0, 2 * M_PI,
@@ -292,14 +307,7 @@ void reset_game(scene_t *scene){
 
     create_physics_collision(scene, 1.5, ball, spring);
 
-    // add accelerators
-    body_t *acc1 = make_accelerator(50, 20, (vector_t){500, 200}, (rgb_color_t) {1.0, 0, 1});
-    body_set_centroid(acc1, (vector_t){0, 0});
-    scene_add_body(scene, acc1);
-    body_t *acc2 = make_accelerator(50, 20, (vector_t){500, 230}, (rgb_color_t) {.8, 0, .8});
-    scene_add_body(scene, acc2);
-    body_t *acc3 = make_accelerator(50, 20, (vector_t){500, 260}, (rgb_color_t) {.6, 0, .6});
-    scene_add_body(scene, acc3);
+
 }
 
 int main(){
@@ -322,18 +330,19 @@ int main(){
     double total_time = 0.0;
     body_t *ball = get_player(scene);
     sdl_on_key(on_key);
-    body_t *spring = get_spring(scene);
+    // body_t *spring = get_spring(scene);
 
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
-        
-        if (polygon_centroid(body_get_shape(ball)).y > 445){
+        body_set_color(ball, phase_color(body_get_color(ball)));
+
+        if (hit_wall == false && polygon_centroid(body_get_shape(ball)).x < 700){ // TODO: make more accurate
             hit_wall = true;
         }
 
         if (hit_wall == true){
-            body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 10});
+            body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 15});
         }
 
         temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
@@ -348,7 +357,7 @@ int main(){
         spring_bounds(scene);
 
         // check if life lost
-        if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2 - BALL_ERROR){
+        if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2){ // - BALL_ERROR
             printf("GAME OVER\n");
             break; // REPLACE LATER
         }

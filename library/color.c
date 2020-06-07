@@ -12,17 +12,17 @@ rgb_color_t lighter_color(rgb_color_t color){
 }
 
 rgb_color_t phase_color(rgb_color_t color){
-    float new_r = color.r + ADD;
-    float new_g = color.g + ADD;
-    float new_b = color.b + ADD;
-    if (new_r > 1){
-        new_r -= 1;
+    // phases colors through purple shades, START WITH BLUE VALUE at 1.0
+    float new_r = color.r;
+    float new_g = color.g;
+    float new_b = color.b;
+    if (new_r > new_g){
+        new_r -= ADD;
+        new_g += ADD;
     }
-    if (new_g > 1){
-        new_g -= 1;
-    }
-    if (new_b > 1){
-        new_b -= 1;
+    else {
+        new_r += ADD;
+        new_g -= ADD;
     }
     return (rgb_color_t){new_r, new_g, new_b};
 }
