@@ -284,13 +284,13 @@ void make_bumpers(scene_t *scene){
     list_t *bumper_list = list_init(1, (free_func_t) body_free);
     body_t *ball = get_player(scene);
 
-    body_t *top_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, BALL_MASS, 0);
+    body_t *top_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
     body_set_centroid(top_bumper, (vector_t) {CONE_POINT.x, alley_top + 0.8 * WALL_HEIGHT.y});
     scene_add_body(scene, top_bumper);
     list_add(bumper_list, top_bumper);
 
-    body_t *top_left_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, BALL_MASS, 0);
-    body_t *top_right_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, BALL_MASS, 0);
+    body_t *top_left_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
+    body_t *top_right_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
     body_set_centroid(top_left_bumper, (vector_t) {CONE_POINT.x - delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
     body_set_centroid(top_right_bumper, (vector_t) {CONE_POINT.x + delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
     scene_add_body(scene, top_left_bumper);
@@ -298,11 +298,11 @@ void make_bumpers(scene_t *scene){
     list_add(bumper_list, top_left_bumper);
     list_add(bumper_list, top_right_bumper);
 
-    body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, BALL_MASS, 0);
+    body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
     body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     list_add(bumper_list, black_hole);
 
-    body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, BALL_MASS, 0);
+    body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
     body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     list_add(bumper_list, gain_life);
 
