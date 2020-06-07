@@ -51,7 +51,7 @@ const vector_t ALLEY_POINT = {900 - 3 + 50/2, MAX_Y/2 - 600/2 + 250/2};
 const vector_t WALL_HEIGHT = {245, 260};
 const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
-const rgb_color_t BALL_COLOR  = {1, 0, 1};
+const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const double BALL_ERROR = 30;
 
 const double BALL_HEIGHT = 65.0;
@@ -68,10 +68,9 @@ const double SWINGER_LENGTH = 110;
 const double LEFT_SWINGER_ANG = 11*M_PI/6;
 const double RIGHT_SWINGER_ANG = 7*M_PI/6;
 
-const double ACC_WIDTH = 50;
+const double ACC_WIDTH = 70;
 const double ACC_HEIGHT = 20;
 const double ACC_POS_Y = 250;
-const double ACC_SEPARATION = 30;
 
 bool flung = false;
 bool hit_wall = false;
@@ -283,9 +282,9 @@ void reset_game(scene_t *scene){
     // add accelerators
     body_t *acc1 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y}, (rgb_color_t) {1.0, 0, 1});
     scene_add_body(scene, acc1);
-    body_t *acc2 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + ACC_SEPARATION}, (rgb_color_t) {.8, 0, .8});
+    body_t *acc2 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + BALL_ERROR}, (rgb_color_t) {.8, 0, .8});
     scene_add_body(scene, acc2);
-    body_t *acc3 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + 2 * ACC_SEPARATION}, (rgb_color_t) {.6, 0, .6});
+    body_t *acc3 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + 2 * BALL_ERROR}, (rgb_color_t) {.6, 0, .6});
     scene_add_body(scene, acc3);
 
     // add ball
@@ -306,8 +305,14 @@ void reset_game(scene_t *scene){
     scene_add_body(scene, spring);
 
     create_physics_collision(scene, 1.5, ball, spring);
+}
 
-
+void check_accelerator(body_t *ball){
+    vector_t c = polygon_centroid(body_get_shape(ball));
+    if ((c.x < MID_X - ACC_WIDTH || c.x < MID_X + ACC_WIDTH)
+    && (c.y < ACC_POS_Y - ACC_HEIGHT || c.y < ACC_POS_Y + 5 * ACC_HEIGHT)){
+        body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y + 35});
+    }
 }
 
 int main(){
@@ -335,12 +340,13 @@ int main(){
     while (!sdl_is_done()){
         double dt = time_since_last_tick();
         total_time += dt;
-        body_set_color(ball, phase_color(body_get_color(ball)));
+        check_accelerator(ball);
 
-        if (hit_wall == false && polygon_centroid(body_get_shape(ball)).x < 700){ // TODO: make more accurate
+        body_set_color(ball, phase_color(BALL_COLOR, total_time));
+
+        if (hit_wall == false && polygon_centroid(body_get_shape(ball)).x < 770){ // TODO: make more accurate
             hit_wall = true;
         }
-
         if (hit_wall == true){
             body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 15});
         }
@@ -350,9 +356,6 @@ int main(){
         swinger_tick(s1, dt);
         swinger_tick(s2, dt);
 
-       	if (total_time > 1){
-            total_time = 0;
-        }
         scene_tick(scene, dt);
         spring_bounds(scene);
 

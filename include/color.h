@@ -16,6 +16,7 @@ typedef struct {
 // Makes the brick color lighter to account for health
 rgb_color_t lighter_color(rgb_color_t color);
 
-rgb_color_t phase_color(rgb_color_t color);
+// start with og_color values either 1 or 0
+rgb_color_t phase_color(rgb_color_t og_color, double time_passed);
 
 #endif // #ifndef __COLOR_H__
