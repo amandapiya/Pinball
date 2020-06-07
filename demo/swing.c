@@ -35,7 +35,8 @@ int main(){
     double total_time = 0.0;
 
     swinger_t *s = swinger_init((vector_t){300, 300}, M_PI/2, 100, (rgb_color_t){1.0, 0, 0});
-    body_t *star = make_star(6, 100, (vector_t){500, 500},(rgb_color_t){1.0, 0, 1.0});
+    body_t *star = make_star(6, 100, (rgb_color_t){1.0, 0, 1.0});
+    body_set_centroid(star, (vector_t){500, 500});
     body_t *acc = make_accelerator(100, 50, (vector_t){100, 100}, (rgb_color_t){1.0, 0, 1.0});
 
     while (!sdl_is_done()){

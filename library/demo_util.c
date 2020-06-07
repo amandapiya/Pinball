@@ -38,9 +38,8 @@ body_t *make_box(double width, double height, rgb_color_t color, int spring){
     }
 
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    double mass;
+    double mass = 200.0;
     if (spring == 1){
-        mass = 200.0;
         *aux = (body_aux_t){false, true, false};
     }else{
         *aux = (body_aux_t) {false, false, false};
@@ -64,14 +63,12 @@ body_t *make_trapezoid(double width, double height, double spacing, double slope
     *v = (vector_t) {slope * spacing, -1 * spacing};
     list_add(rect, v);
 
-    double mass = INFINITY;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     *aux = (body_aux_t){false, false, false};
-    return body_init_with_info(rect, mass, color, aux, free);
+    return body_init_with_info(rect, INFINITY, color, aux, free);
 }
 
-body_t *make_circle(size_t rad, double min_rad, double max_rad,
-  rgb_color_t color, double mass, int player) {
+body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t color, double mass, int player) {
     vector_t center = VEC_ZERO;
     list_t *points = list_init(1, free);
     double theta = min_rad;
@@ -99,7 +96,8 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad,
     return body_init_with_info(points, mass, color, aux, free);
 }
 
-body_t *make_star(size_t num_arms, size_t rad, vector_t center_V, rgb_color_t color){
+body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
+    vector_t center = VEC_ZERO;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     *aux = (body_aux_t){false, false, true};
     list_t *vertices = list_init(1, free);
@@ -111,19 +109,18 @@ body_t *make_star(size_t num_arms, size_t rad, vector_t center_V, rgb_color_t co
         vertex_add->x = cos(theta)*rad;
         vertex_add->y = sin(theta)*rad;
         vector_t *point = malloc(sizeof(vector_t));
-        *point = vec_add(center_V, *vertex_add);
+        *point = vec_add(center, *vertex_add);
         list_add(vertices, point);
         theta += angle_between_vertices;
         vertex_add->x = cos(theta)*inner_side_ratio*rad;
         vertex_add->y = sin(theta)*inner_side_ratio*rad;
         vector_t *point2 = malloc(sizeof(vector_t));
-        *point2 = vec_add(center_V, *vertex_add);
+        *point2 = vec_add(center, *vertex_add);
         list_add(vertices, point2);
         free(vertex_add);
         theta += angle_between_vertices;
     }
-    body_t *star = body_init_with_info(vertices, INFINITY, color, (void *)aux, free);
-    return star;
+    return body_init_with_info(vertices, INFINITY, color, aux, free);
 }
 
 body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t color){
