@@ -53,11 +53,13 @@ const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
+
 // Ball constants
 const double BALL_ERROR = 35.0;
 const double BALL_MASS = 1.0;
 const double BALL_HEIGHT = 65.0;
 
+// Spring constants
 const double SPRING_HEIGHT = 10.0;
 const double SPRING_SPACE = 5.0;
 
@@ -66,7 +68,8 @@ const double G = 6.67E11;
 const double M = 6E24;
 const double g = 9.8; 
 
-const double SWINGER_ELASTICITY = 0.9;
+// Swinger constants
+const double SWINGER_ELASTICITY = 1.5;
 const double SWINGER_HEIGHT = 150;
 const double LEFT_SWINGER_POS = 380;
 const double RIGHT_SWINGER_POS = 620;
@@ -225,7 +228,9 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     if (body_is_removed(bumper)) return;
    
     body_remove(bumper);
-    
+   
+    body_set_centroid(ball, vec_add(body_get_centroid(ball),
+        vec_multiply(0.1 * 2, body_get_velocity(ball))));
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
     double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
     double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
@@ -250,6 +255,8 @@ void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
     double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
     double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
+    body_set_centroid(ball, vec_add(body_get_centroid(ball),
+        vec_multiply(0.1 * 2, body_get_velocity(ball))));
     body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
     body_set_centroid(b, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     scene_t *scene = aux;
@@ -483,6 +490,8 @@ int main(){
         total_time += dt;
         printf("SCORE: %f\n", score);
         printf("LIVES: %d\n", lives);
+        
+       // sdl_render_text(VEC_ZERO, (vector_t) {300, 200}, "AMY PHAM", BLACK);
         //   check_accelerator(ball);
 
 

@@ -71,6 +71,17 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color);
  * Displays the rendered frame on the SDL window.
  * Must be called after drawing the polygons in order to show them.
  */
+
+/**
+ * Renders text
+ *
+ * @param position center of the text rectangle
+ * @param size size of the text rectangle
+ * @param text the text to print
+ * @param color the color of the text
+ */
+void sdl_render_text(vector_t position, vector_t size, char* text, rgb_color_t color);
+
 void sdl_show(void);
 
 /**
