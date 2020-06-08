@@ -4,6 +4,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+//#include <SDL2/SDL_ttf.h>
 #include "sdl_wrapper.h"
 #include "swinger.h"
 #include "key_handler_aux.h"
@@ -119,6 +120,7 @@ void sdl_init(vector_t min, vector_t max){
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
+//    TTF_Init();
     window = SDL_CreateWindow(
         WINDOW_TITLE,
         SDL_WINDOWPOS_CENTERED,
@@ -136,6 +138,7 @@ bool sdl_is_done(void){
     while (SDL_PollEvent(event)) {
         switch (event->type) {
             case SDL_QUIT:
+ //               TTF_Quit();
                 free(event);
                 return true;
             case SDL_KEYDOWN:
@@ -200,6 +203,12 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color){
     free(y_points);
 }
 
+/*
+void sdl_render_text(list_t* points, char* text, rgb_color_t color){
+    TTF_FONT* Sans = TTF_OpenFont("Sans.ttf", 24);
+    SDL_Rect message_rect; 
+}*/
+
 void sdl_show(void) {
     SDL_RenderPresent(renderer);
 }
@@ -244,3 +253,4 @@ double time_since_last_tick(void){
     last_clock = now;
     return difference;
 }
+

@@ -32,7 +32,7 @@ const double MID_X = 500;
 
 const rgb_color_t BLACK = {0, 0, 0};
 const rgb_color_t INNER_COLOR = {1, 1, 1};
-const vector_t BOX_SPEC = {150, 90};
+const vector_t BOX_SPEC = {200, 90};
 const vector_t BOX_POINT = {MAX_X - 150 * 1.15, MAX_Y - 90 * 1.15};
 const double SPACING_BOXES = 12;
 const double SPACING_BOX_GAP = (MAX_Y - 50 - (4 * 90))/4;
@@ -59,7 +59,7 @@ const double BALL_HEIGHT = 65.0;
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
-const double g = 100; // CHANGED
+const double g = 9.8; // CHANGED
 
 const double SWINGER_ELASTICITY = 2;
 const double SWINGER_HEIGHT = 150;
@@ -74,9 +74,14 @@ const double ACC_WIDTH = 70;
 const double ACC_HEIGHT = 20;
 const double ACC_POS_Y = 250;
 
+const double WALL_COLLISION = 0.75;
+const double BUMPER_COLLISION = 0.9;
+
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false; // REMOVE ALL GRAVITY CODE
+int lives = 3;
+double points = 0.0;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -113,8 +118,10 @@ void make_score_template(scene_t *scene){
 void make_pinball_border(scene_t *scene){
     body_t *ball = get_player(scene);
 
+    // Drag?
+    //create_drag(scene, 2.0, ball);
+
     list_t *pinball_border = list_init(1, (free_func_t) body_free);
-    //TODO: add collisions with ball
 
     // Sets up pinball border
     body_t *border1 = make_box(SPACING, BOARD_SPEC.y, BLACK, 0);
@@ -131,6 +138,7 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, border4);
 
     // Sets up ball alley
+    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
     body_t *alley1 = make_box(SPACING, ALLEY_SPEC.y, BLACK, 0);
     body_t *alley2 = make_box(ALLEY_SPEC.x, SPACING, BLACK, 0);
     body_t *alley3 = make_box(SPACING, ALLEY_SPEC.y, BLACK, 0);
@@ -140,7 +148,6 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, alley1);
     list_add(pinball_border, alley2);
     list_add(pinball_border, alley3);
-    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
 
     // Sets up segueway
     body_t *segueway = make_trapezoid(SEGUEWAY_LEFT_SPEC.x, SEGUEWAY_LEFT_SPEC.y, SPACING, -1, BLACK, 1);
@@ -176,16 +183,49 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, cone1);
     list_add(pinball_border, cone2);
 
-    // Sets up losing area
-    body_t *losing_area = make_box(LOSING_SPEC.x, LOSING_SPEC.y, BLACK, 0);
-    body_set_centroid(losing_area, CONE_POINT);
-    list_add(pinball_border, losing_area);
-
     for (size_t i = 0; i < list_size(pinball_border); i++){
         body_t *b = list_get(pinball_border, i);
         scene_add_body(scene, b);
-        create_physics_collision(scene, .5, ball, b);
+        create_physics_collision(scene, WALL_COLLISION, ball, b);
     }
+}
+
+void make_bumpers(scene_t *scene){
+    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
+    double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+    double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
+    list_t *bumper_list = list_init(1, (free_func_t) body_free);
+    body_t *ball = get_player(scene);
+
+    body_t *top_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
+    body_set_centroid(top_bumper, (vector_t) {CONE_POINT.x, alley_top + 0.8 * WALL_HEIGHT.y});
+    list_add(bumper_list, top_bumper);
+
+    body_t *top_left_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
+    body_t *top_right_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
+    body_set_centroid(top_left_bumper, (vector_t) {CONE_POINT.x - delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
+    body_set_centroid(top_right_bumper, (vector_t) {CONE_POINT.x + delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
+    list_add(bumper_list, top_left_bumper);
+    list_add(bumper_list, top_right_bumper);
+
+    body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
+    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    list_add(bumper_list, black_hole);
+
+    body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
+    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    list_add(bumper_list, gain_life);
+
+    body_t *rotating_star = make_star(5, bumper_radius, BLACK);
+    body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top + 1.1 * WALL_HEIGHT.y});
+    list_add(bumper_list, rotating_star);
+
+    for (size_t i = 0; i < list_size(bumper_list); i++){
+        body_t *b = list_get(bumper_list, i);
+        scene_add_body(scene, b);
+        create_physics_collision(scene, BUMPER_COLLISION, ball, b);
+    }
+
 }
 
 void spring_bounds(scene_t *scene){
@@ -200,9 +240,7 @@ void spring_bounds(scene_t *scene){
     else if (v.y >= ALLEY_POINT.y + BALL_HEIGHT && flung == true){
         body_set_velocity(spring, VEC_ZERO);
         if (added_grav == false){
-            printf("ADDING GRAV\n");
             added_grav = true;
-            /*
             // Gravity box !
             double R = sqrt(G * M / g);
             body_t *grav = make_circle(5.0, 0.0, 2 * M_PI, BLACK, M, 0);
@@ -210,12 +248,11 @@ void spring_bounds(scene_t *scene){
             body_set_centroid(grav, gravity_center);
             scene_add_body(scene, grav);
             create_newtonian_gravity(scene, G, ball, grav);
-*/
             //body_set_velocity(ball, (vector_t) {0.0, -3.0});
         }
         else if (added_grav == true){
             vector_t temp_v = body_get_velocity(ball);
-            temp_v.y -= 1;
+            temp_v.y -= 2.0;
             body_set_velocity(ball, temp_v);
         }
     }
@@ -240,21 +277,27 @@ void spring_fling(void *key_handler_aux){
     create_spring(scene, 1000.0, spring, anchor);
 }
 
+void left_swinger(double held_time, void *key_handler_aux){
+    swinger_t *s = key_aux_get_swinger1(key_handler_aux);
+    double momentum = held_time * MOMENTUM_CONSTANT;
+    swinger_add_momentum(s, momentum);
+}
+
+void right_swinger(double held_time, void *key_handler_aux){
+        swinger_t *s2 = key_aux_get_swinger2(key_handler_aux);
+        double momentum2 = -1 * held_time * MOMENTUM_CONSTANT;
+        swinger_add_momentum(s2, momentum2);
+}
+
 void on_key(char key, key_event_type_t type, double held_time, void *key_handler_aux) {
     body_t *spring = key_aux_get_spring(key_handler_aux);
     if (type == KEY_PRESSED){
         switch (key) {
             case (LEFT_ARROW):
-		            printf(""); // idk why it doesnt compile if there are no print statements
-                swinger_t *s = key_aux_get_swinger1(key_handler_aux);
-                double momentum = held_time * MOMENTUM_CONSTANT;
-                swinger_add_momentum(s, momentum);
+                left_swinger(held_time, key_handler_aux);
                 break;
             case (RIGHT_ARROW):
-		            printf("");
-                swinger_t *s2 = key_aux_get_swinger2(key_handler_aux);
-                double momentum2 = -1 * held_time * MOMENTUM_CONSTANT;
-                swinger_add_momentum(s2, momentum2);
+                right_swinger(held_time, key_handler_aux);
                 break;
             case (' '):
                 if (flung == false){
@@ -277,51 +320,32 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
     }
 }
 
-void make_bumpers(scene_t *scene){
-    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
-    double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-    double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
-    list_t *bumper_list = list_init(1, (free_func_t) body_free);
-    body_t *ball = get_player(scene);
-
-    body_t *top_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
-    body_set_centroid(top_bumper, (vector_t) {CONE_POINT.x, alley_top + 0.8 * WALL_HEIGHT.y});
-    scene_add_body(scene, top_bumper);
-    list_add(bumper_list, top_bumper);
-
-    body_t *top_left_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
-    body_t *top_right_bumper = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
-    body_set_centroid(top_left_bumper, (vector_t) {CONE_POINT.x - delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
-    body_set_centroid(top_right_bumper, (vector_t) {CONE_POINT.x + delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
-    scene_add_body(scene, top_left_bumper);
-    scene_add_body(scene, top_right_bumper);
-    list_add(bumper_list, top_left_bumper);
-    list_add(bumper_list, top_right_bumper);
-
-    body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
-    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
-    list_add(bumper_list, black_hole);
-
-    body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
-    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
-    list_add(bumper_list, gain_life);
-
-    body_t *rotating_star = make_star(5, bumper_radius, BLACK);
-    body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top + 1.1 * WALL_HEIGHT.y});
-    list_add(bumper_list, rotating_star);
-
-    for (size_t i = 0; i < list_size(bumper_list); i++){
-        body_t *b = list_get(bumper_list, i);
-        scene_add_body(scene, b);
-        create_physics_collision(scene, .5, ball, b);
+void show_lives(scene_t *scene){
+    for (int i = 0; i < lives - 1; i++){
+        double spacing = 15.0;
+        double ball_rad;
+        body_t *l = malloc(sizeof(body_t*));
+        if (lives <= 3){
+            ball_rad = ((BOX_SPEC.x - 2 * SPACING_BOXES) - ((3 + 1) * spacing)) / (2 * (3));
+            l = make_circle(ball_rad, 0, 2 * M_PI, (rgb_color_t) {0.4, 0.4, 0.4}, 5.0, 0);
+        }
+        else{
+            ball_rad = ((BOX_SPEC.x - 2 * SPACING_BOXES) - (lives * spacing)) / (2 * (lives - 1));
+            l = make_circle(ball_rad, 0, 2 * M_PI, (rgb_color_t) {0.4, 0.4, 0.4}, 5.0, 0);
+        }
+        body_set_centroid(l, (vector_t) {BOX_POINT.x - BOX_SPEC.x / 2 + 2 * SPACING_BOXES + spacing + i * (2 * ball_rad + spacing), BOX_POINT.y});
+        scene_add_body(scene, l);
     }
-
 }
 
 void reset_game(scene_t *scene){
     flung = false;
     added_grav = false;
-
+   
+    for (size_t i = 0; i < scene_bodies(scene); i++){
+        body_remove(scene_get_body(scene, i));
+    }
+    
     // add accelerators
     body_t *acc1 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y}, (rgb_color_t) {1.0, 0, 1});
     scene_add_body(scene, acc1);
@@ -347,6 +371,19 @@ void reset_game(scene_t *scene){
     scene_add_body(scene, spring);
 
     create_physics_collision(scene, 1.5, ball, spring);
+    
+    // Sets up losing area
+    body_t *losing_area = make_box(LOSING_SPEC.x, LOSING_SPEC.y, BLACK, 0);
+    body_set_centroid(losing_area, CONE_POINT);
+    create_destructive_collision(scene, ball, losing_area);
+    scene_add_body(scene, losing_area);
+    
+    make_pinball_border(scene);
+    make_score_template(scene);
+    make_bumpers(scene);
+
+    show_lives(scene);
+
 }
 
 void check_accelerator(body_t *ball){
@@ -357,14 +394,12 @@ void check_accelerator(body_t *ball){
     }
 }
 
+
 int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
+    double total_time = 0.0;
     reset_game(scene);
-
-    make_pinball_border(scene);
-    make_score_template(scene);
-    make_bumpers(scene);
 
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
     swinger_t *s1 = swinger_init((vector_t){LEFT_SWINGER_POS, SWINGER_HEIGHT}, LEFT_SWINGER_ANG, SWINGER_LENGTH, SWINGER_COLOR);
@@ -375,41 +410,48 @@ int main(){
     int *sw2counter = malloc(sizeof(int));
     *sw1counter = 0;
     *sw2counter = 0;
-    double total_time = 0.0;
-    body_t *ball = get_player(scene);
+    
     sdl_on_key(on_key);
-    // body_t *spring = get_spring(scene);
-
     while (!sdl_is_done()){
+        body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-        check_accelerator(ball);
+     //   check_accelerator(ball);
 
-        body_set_color(ball, phase_color(BALL_COLOR, total_time));
 
+        /*
         if (hit_wall == false && polygon_centroid(body_get_shape(ball)).x < 770){ // TODO: make more accurate
             hit_wall = true;
         }
         if (hit_wall == true){
             body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 15});
         }
-
-        temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
-        temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
-        swinger_tick(s1, dt);
-        swinger_tick(s2, dt);
-
-        scene_tick(scene, dt);
-        spring_bounds(scene);
+*/
 
         // check if life lost
-        if (polygon_centroid(body_get_shape(ball)).y < ALLEY_SPEC.x + 1 / 2-5 - BALL_ERROR){ // - BALL_ERROR
-            printf("GAME OVER\n");
-            break; // REPLACE LATER
+        if (get_player(scene) == NULL){    
+            printf("LIVES: %d\n", lives);
+            lives--;
+            reset_game(scene);
+        }
+        else{
+            // PUT ANYTHING WITH BALL IN HERE -- assures no read error for null
+            spring_bounds(scene);
+            body_set_color(ball, phase_color(BALL_COLOR, total_time));
+            temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
+            temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
+            swinger_tick(s1, dt);
+            swinger_tick(s2, dt);
         }
 
+        if (lives == 0){
+            // end game screen}
+        }
+        
+        scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
     }
+
     swinger_free(s1);
     swinger_free(s2);
     free(sw1counter);

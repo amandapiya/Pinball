@@ -71,7 +71,6 @@ void scene_add_force_creator(scene_t *scene, force_creator_t forcer, void *aux, 
 
 void scene_tick(scene_t *scene, double dt){
     // does all forces
-    printf("FOCES: %zu\n", list_size(scene->force_creators));
     for(size_t f = 0; f < list_size(scene->force_creators); f++){
         force_storage_t *storage = list_get(scene->force_creators, f);
 
