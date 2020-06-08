@@ -57,6 +57,10 @@ const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
 const double BALL_ERROR = 35.0;
 const double BALL_MASS = 1.0;
 const double BALL_HEIGHT = 65.0;
+
+const double SPRING_HEIGHT = 10.0;
+const double SPRING_SPACE = 5.0;
+
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
@@ -140,9 +144,6 @@ void make_score_template(scene_t *scene){
 void make_pinball_border(scene_t *scene){
     body_t *ball = get_player(scene);
 
-    // Drag?
-    //create_drag(scene, 2.0, ball);
-
     list_t *pinball_border = list_init(1, (free_func_t) body_free);
 
     // Sets up pinball border
@@ -214,7 +215,6 @@ void make_pinball_border(scene_t *scene){
 
 /*   || BUMPER STUFF || */
 
-// points handler; akin to forces
 void points(body_t *body1, body_t *body2, vector_t axis, void *aux){
     score += aux_get_constant(aux);
 }
@@ -233,11 +233,39 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     body_set_centroid(b, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     scene_t *scene = aux;
     scene_add_body(scene, b);
-    printf("SHOWING LIVES\n");
     show_lives(scene);
     create_physics_collision(scene, BUMPER_COLLISION, ball, b);
     aux_t *bumper_aux = aux_init(REG_POINTS, ball, b);
     create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
+}
+
+// no lives lost; ball just restarts on the spring
+void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
+    if (body_is_removed(bumper)) return;
+    flung = false;
+
+    body_remove(bumper);
+   
+    // bumper reset
+    double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+    double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
+    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
+    body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
+    body_set_centroid(b, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    scene_t *scene = aux;
+    scene_add_body(scene, b);
+    create_physics_collision(scene, BUMPER_COLLISION, ball, b);
+    aux_t *bumper_aux = aux_init(REG_POINTS, ball, b);
+    create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
+
+    // ball and spring reset 
+    body_set_velocity(ball, VEC_ZERO);
+    body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT}));
+    body_t *spring = get_spring(scene);
+    vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y +
+        BALL_HEIGHT - (ALLEY_SPEC.x / 2 - BALL_ERROR) - (SPRING_HEIGHT/ 2) - SPRING_SPACE};
+    body_set_centroid(spring, spring_start_pos);
+
 }
 
 void make_bumpers(scene_t *scene){
@@ -270,6 +298,7 @@ void make_bumpers(scene_t *scene){
     body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     scene_add_body(scene, black_hole);
     create_physics_collision(scene, BUMPER_COLLISION, ball, black_hole);
+    create_collision(scene, ball, black_hole, (collision_handler_t) restart_bumper, scene, NULL);
 
     body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
     body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
@@ -375,7 +404,6 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
     }
 }
 
-
 void reset_game(scene_t *scene){
     flung = false;
     added_grav = false;
@@ -399,12 +427,11 @@ void reset_game(scene_t *scene){
     scene_add_body(scene, ball);
 
     // add spring
-    double spring_height = 10.0;
     rgb_color_t spring_color = (rgb_color_t) {0.41, 0.41, 0.41};
-    body_t *spring = make_box(ALLEY_SPEC.x - 5.0, spring_height,
+    body_t *spring = make_box(ALLEY_SPEC.x - 5.0, SPRING_HEIGHT,
         spring_color, 1);
     vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y +
-        BALL_HEIGHT - (ALLEY_SPEC.x / 2 - BALL_ERROR) - (spring_height / 2)};
+        BALL_HEIGHT - (ALLEY_SPEC.x / 2 - BALL_ERROR) - (SPRING_HEIGHT/ 2) - SPRING_SPACE};
     body_set_centroid(spring, spring_start_pos);
     scene_add_body(scene, spring);
 
