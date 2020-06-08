@@ -59,7 +59,7 @@ const double BALL_HEIGHT = 65.0;
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
-const double g = 9.8; // CHANGED
+const double g = 9.8; 
 
 const double SWINGER_ELASTICITY = 2;
 const double SWINGER_HEIGHT = 150;
@@ -77,11 +77,14 @@ const double ACC_POS_Y = 250;
 const double WALL_COLLISION = 0.75;
 const double BUMPER_COLLISION = 0.9;
 
+// POINTS STUFF
+const double REG_POINTS = 500.0;
+
 bool flung = false;
 bool hit_wall = false;
-bool added_grav = false; // REMOVE ALL GRAVITY CODE
+bool added_grav = false;
 int lives = 3;
-double points = 0.0;
+double score = 0.0;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -190,6 +193,13 @@ void make_pinball_border(scene_t *scene){
     }
 }
 
+/*   || BUMPER STUFF || */
+
+// points handler; akin to forces
+void points(body_t *body1, body_t *body2, vector_t axis, void *aux){
+    score += aux_get_constant(aux);
+}
+
 void make_bumpers(scene_t *scene){
     double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
@@ -224,6 +234,8 @@ void make_bumpers(scene_t *scene){
         body_t *b = list_get(bumper_list, i);
         scene_add_body(scene, b);
         create_physics_collision(scene, BUMPER_COLLISION, ball, b);
+        aux_t *aux = aux_init(REG_POINTS, ball, b);
+        create_collision(scene, ball, b, (collision_handler_t) points, (void*) aux, (free_func_t) aux_free);
     }
 
 }
@@ -416,7 +428,9 @@ int main(){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-     //   check_accelerator(ball);
+        printf("SCORE: %f\n", score);
+        printf("LIVES: %d\n", lives);
+        //   check_accelerator(ball);
 
 
         /*
@@ -430,7 +444,6 @@ int main(){
 
         // check if life lost
         if (get_player(scene) == NULL){    
-            printf("LIVES: %d\n", lives);
             lives--;
             reset_game(scene);
         }
@@ -444,8 +457,9 @@ int main(){
             swinger_tick(s2, dt);
         }
 
-        if (lives == 0){
+        if (lives <= 0){
             // end game screen}
+            printf("GAME OVER\n");
         }
         
         scene_tick(scene, dt);
