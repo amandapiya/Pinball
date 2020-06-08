@@ -204,7 +204,7 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color){
 }
 
 // might need to double check clearing stuff idk yet
-void sdl_render_text(vector_t position, vector_t size, char* text, rgb_color_t color){
+void sdl_render_text(vector_t position, char* text, rgb_color_t color){
     assert(0 <= color.r && color.r <= 1);
     assert(0 <= color.g && color.g <= 1);
     assert(0 <= color.b && color.b <= 1);
@@ -212,18 +212,19 @@ void sdl_render_text(vector_t position, vector_t size, char* text, rgb_color_t c
     assert(position.y >= 0 && position.y <= WINDOW_HEIGHT);
     
     vector_t window_center = get_window_center();
+    
+    TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", 300);
+    SDL_Color textColor = {color.r * 255, color.g * 255, color.b *255};
+    SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-    TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", 24);
     SDL_Rect* message_rect = malloc(sizeof(SDL_Rect));
     position =  get_window_position(position, window_center);
     message_rect->x = position.x;
     message_rect->y = position.y;
-    message_rect->w = size.x;
-    message_rect->h = size.y;
+    message_rect->w = surface->w;
+    message_rect->h = surface->h;
 
-    SDL_Color textColor = {color.r * 255, color.g * 255, color.b *255};
-    SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
     SDL_RenderCopy(renderer, texture, NULL, message_rect);
 

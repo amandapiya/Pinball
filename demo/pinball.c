@@ -491,7 +491,7 @@ int main(){
         printf("SCORE: %f\n", score);
         printf("LIVES: %d\n", lives);
         
-       // sdl_render_text(VEC_ZERO, (vector_t) {300, 200}, "AMY PHAM", BLACK);
+        sdl_render_text((vector_t) {300, 200}, "AMY PHAM", (rgb_color_t) {0, 0, 0});
         //   check_accelerator(ball);
 
 
