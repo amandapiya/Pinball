@@ -66,7 +66,7 @@ const double G = 6.67E11;
 const double M = 6E24;
 const double g = 9.8; 
 
-const double SWINGER_ELASTICITY = 2;
+const double SWINGER_ELASTICITY = 0.9;
 const double SWINGER_HEIGHT = 150;
 const double LEFT_SWINGER_POS = 380;
 const double RIGHT_SWINGER_POS = 620;
