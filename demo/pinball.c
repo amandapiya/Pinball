@@ -53,7 +53,8 @@ const vector_t LEFT_WALL_SPEC = {168, 413};
 const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
-const double BALL_ERROR = 30;
+// Ball constants
+const double BALL_ERROR = 35.0;
 const double BALL_MASS = 1.0;
 const double BALL_HEIGHT = 65.0;
 // Grav constants
@@ -74,7 +75,7 @@ const double ACC_WIDTH = 70;
 const double ACC_HEIGHT = 20;
 const double ACC_POS_Y = 250;
 
-const double WALL_COLLISION = 0.75;
+const double WALL_COLLISION = 0.60;
 const double BUMPER_COLLISION = 0.9;
 
 // POINTS STUFF
@@ -104,6 +105,24 @@ body_t *get_spring(scene_t *scene){
         }
     }
     return NULL;
+}
+
+void show_lives(scene_t *scene){
+    for (int i = 0; i < lives - 1; i++){
+        double spacing = 15.0;
+        double ball_rad;
+        body_t *l = malloc(sizeof(body_t*));
+        if (lives <= 3){
+            ball_rad = ((BOX_SPEC.x - 2 * SPACING_BOXES) - ((3 + 1) * spacing)) / (2 * (3));
+            l = make_circle(ball_rad, 0, 2 * M_PI, (rgb_color_t) {0.4, 0.4, 0.4}, 5.0, 0);
+        }
+        else{
+            ball_rad = ((BOX_SPEC.x - 2 * SPACING_BOXES) - (lives * spacing)) / (2 * (lives - 1));
+            l = make_circle(ball_rad, 0, 2 * M_PI, (rgb_color_t) {0.4, 0.4, 0.4}, 5.0, 0);
+        }
+        body_set_centroid(l, (vector_t) {BOX_POINT.x - BOX_SPEC.x / 2 + 2 * SPACING_BOXES + spacing + i * (2 * ball_rad + spacing), BOX_POINT.y});
+        scene_add_body(scene, l);
+    }
 }
 
 void make_score_template(scene_t *scene){
@@ -200,6 +219,27 @@ void points(body_t *body1, body_t *body2, vector_t axis, void *aux){
     score += aux_get_constant(aux);
 }
 
+void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
+    lives += 1;
+
+    if (body_is_removed(bumper)) return;
+   
+    body_remove(bumper);
+    
+    double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+    double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
+    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
+    body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
+    body_set_centroid(b, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    scene_t *scene = aux;
+    scene_add_body(scene, b);
+    printf("SHOWING LIVES\n");
+    show_lives(scene);
+    create_physics_collision(scene, BUMPER_COLLISION, ball, b);
+    aux_t *bumper_aux = aux_init(REG_POINTS, ball, b);
+    create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
+}
+
 void make_bumpers(scene_t *scene){
     double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
@@ -217,27 +257,30 @@ void make_bumpers(scene_t *scene){
     body_set_centroid(top_right_bumper, (vector_t) {CONE_POINT.x + delta_x, alley_top + 0.5 * WALL_HEIGHT.y});
     list_add(bumper_list, top_left_bumper);
     list_add(bumper_list, top_right_bumper);
-
-    body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
-    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
-    list_add(bumper_list, black_hole);
-
-    body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
-    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
-    list_add(bumper_list, gain_life);
-
-    body_t *rotating_star = make_star(5, bumper_radius, BLACK);
-    body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top + 1.1 * WALL_HEIGHT.y});
-    list_add(bumper_list, rotating_star);
-
+    
     for (size_t i = 0; i < list_size(bumper_list); i++){
         body_t *b = list_get(bumper_list, i);
         scene_add_body(scene, b);
         create_physics_collision(scene, BUMPER_COLLISION, ball, b);
-        aux_t *aux = aux_init(REG_POINTS, ball, b);
-        create_collision(scene, ball, b, (collision_handler_t) points, (void*) aux, (free_func_t) aux_free);
+        aux_t *bumper_aux = aux_init(REG_POINTS, ball, b);
+        create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
     }
 
+    body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
+    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    scene_add_body(scene, black_hole);
+    create_physics_collision(scene, BUMPER_COLLISION, ball, black_hole);
+
+    body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
+    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    scene_add_body(scene, gain_life);
+    create_physics_collision(scene, BUMPER_COLLISION, ball, gain_life);
+    create_collision(scene, ball, gain_life, (collision_handler_t) extra_life, scene, NULL);
+
+    body_t *rotating_star = make_star(5, bumper_radius, BLACK);
+    body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top + 1.1 * WALL_HEIGHT.y});
+    scene_add_body(scene, rotating_star);
+    create_physics_collision(scene, BUMPER_COLLISION, ball, rotating_star);
 }
 
 void spring_bounds(scene_t *scene){
@@ -332,23 +375,6 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
     }
 }
 
-void show_lives(scene_t *scene){
-    for (int i = 0; i < lives - 1; i++){
-        double spacing = 15.0;
-        double ball_rad;
-        body_t *l = malloc(sizeof(body_t*));
-        if (lives <= 3){
-            ball_rad = ((BOX_SPEC.x - 2 * SPACING_BOXES) - ((3 + 1) * spacing)) / (2 * (3));
-            l = make_circle(ball_rad, 0, 2 * M_PI, (rgb_color_t) {0.4, 0.4, 0.4}, 5.0, 0);
-        }
-        else{
-            ball_rad = ((BOX_SPEC.x - 2 * SPACING_BOXES) - (lives * spacing)) / (2 * (lives - 1));
-            l = make_circle(ball_rad, 0, 2 * M_PI, (rgb_color_t) {0.4, 0.4, 0.4}, 5.0, 0);
-        }
-        body_set_centroid(l, (vector_t) {BOX_POINT.x - BOX_SPEC.x / 2 + 2 * SPACING_BOXES + spacing + i * (2 * ball_rad + spacing), BOX_POINT.y});
-        scene_add_body(scene, l);
-    }
-}
 
 void reset_game(scene_t *scene){
     flung = false;
