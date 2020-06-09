@@ -48,11 +48,12 @@ const double CORNER_DELTA = 4;
 const double ROOF_WIDTH = 650;
 const vector_t CONE_SPEC = {210, 260};
 const vector_t CONE_POINT = {500, 35};
-const vector_t ALLEY_SPEC = {75, 477};
-const vector_t ALLEY_POINT = {900 + 50/2, MAX_Y/2 - 600/2 + 480/2};
-const vector_t WALL_HEIGHT = {215, 215};
+const vector_t ALLEY_SPEC = {75, 377};
+const vector_t ALLEY_WALL_SPEC = {20, 100};
+const vector_t ALLEY_POINT = {900 + 50/2, MAX_Y/2 - 600/2 + 377/2};
+const vector_t WALL_HEIGHT = {215, 113};
 const vector_t LEFT_WALL_POINT = {168, 396};
-const vector_t RIGHT_WALL_POINT = {831, 396};
+const vector_t RIGHT_WALL_POINT = {831, 345};
 const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
@@ -76,7 +77,8 @@ const double SPRING_SPACE = 5.0;
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
-double g = 9.8;
+const double g = 9.8;
+double velocity_adj = 1.0;
 
 // Swinger constants
 const double SWINGER_ELASTICITY = 1.5;
@@ -207,14 +209,26 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, alley2);
     list_add(pinball_border, alley3);
 
+    // Sets up walls on top of alley
+    body_t *alley5 = make_box(SPACING, ALLEY_WALL_SPEC.y, BLACK, 0);
+    body_set_centroid(alley5, (vector_t) {ALLEY_POINT.x + ALLEY_SPEC.x/2, alley_top + ALLEY_WALL_SPEC.y/2});
+    list_add(pinball_border, alley5);
+
     // Sets up segueway
+    body_t *bridge = make_box(BRIDGE_WIDTH, SPACING, BLACK, 0);
+    body_set_centroid(bridge, (vector_t) {RIGHT_WALL_POINT.x + ALLEY_SPEC.x/2 - 1.4*SPACING, alley_top});
+    list_add(pinball_border, bridge);
+
+    alley_top += ALLEY_WALL_SPEC.y;
+
+    /*
     body_t *bridge = make_trapezoid(CORNER_SPEC.x/2.45, CORNER_SPEC.y/2.45, SPACING, -1, BLACK, 1);
     body_set_centroid(bridge, (vector_t) {RIGHT_WALL_POINT.x + BRIDGE_WIDTH - SPACING/2, alley_top});
     list_add(pinball_border, bridge);
     body_t *bridge2 = make_trapezoid(CORNER_SPEC.x/3, CORNER_SPEC.y/3, SPACING, 1, BLACK, 1);
     body_set_centroid(bridge2, (vector_t) {RIGHT_WALL_POINT.x - SPACING/2, alley_top});
     list_add(pinball_border, bridge2);
-
+      */
     // Sets up outer walls
     body_t *wall_left = make_box(SPACING, WALL_HEIGHT.x, BLACK, 0);
     body_t *wall_right = make_box(SPACING, WALL_HEIGHT.y, BLACK, 0);
@@ -318,11 +332,10 @@ void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 }
 
 void make_bumpers(scene_t *scene){
-    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
+    double alley_top = ALLEY_SPEC.y + ALLEY_WALL_SPEC.x + 15 * SPACING;
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
     double delta_x = CONE_POINT.x - (LEFT_WALL_POINT.x - CORNER_DELTA + 15 * SPACING);
     list_t *bumper_list = list_init(1, (free_func_t) body_free);
-    // list_t *star_list = list_init(1, (free_func_t) body_free);
     body_t *ball = get_player(scene);
 
     /*
@@ -340,8 +353,8 @@ void make_bumpers(scene_t *scene){
 
     body_t *bottom_l_bumper = make_circle(bumper_radius/1.5, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
     body_t *bottom_r_bumper = make_circle(bumper_radius/1.5, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
-    body_set_centroid(bottom_l_bumper, (vector_t) {CONE_POINT.x - .8 * delta_x, alley_top - 55 * SPACING});
-    body_set_centroid(bottom_r_bumper, (vector_t) {CONE_POINT.x + .8 * delta_x, alley_top - 55 * SPACING});
+    body_set_centroid(bottom_l_bumper, (vector_t) {CONE_POINT.x - .60 * delta_x, alley_top - 50 * SPACING});
+    body_set_centroid(bottom_r_bumper, (vector_t) {CONE_POINT.x + .60 * delta_x, alley_top - 50 * SPACING});
     list_add(bumper_list, bottom_l_bumper);
     list_add(bumper_list, bottom_r_bumper);
 
@@ -354,13 +367,13 @@ void make_bumpers(scene_t *scene){
     }
 
     body_t *black_hole = make_circle(bumper_radius/1.5, 0, 2 * M_PI, BLACK, INFINITY, 0);
-    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - .9 * delta_x, alley_top - 45 * SPACING});
+    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - .8 * delta_x, alley_top - 43 * SPACING});
     scene_add_body(scene, black_hole);
     create_physics_collision(scene, BUMPER_COLLISION, ball, black_hole);
     create_collision(scene, ball, black_hole, (collision_handler_t) restart_bumper, scene, NULL);
 
     body_t *gain_life = make_circle(bumper_radius/1.5, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
-    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + .9 * delta_x, alley_top - 45 * SPACING});
+    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + .8 * delta_x, alley_top - 43 * SPACING});
     scene_add_body(scene, gain_life);
     create_physics_collision(scene, BUMPER_COLLISION, ball, gain_life);
     create_collision(scene, ball, gain_life, (collision_handler_t) extra_life, scene, NULL);
@@ -407,7 +420,7 @@ void spring_bounds(scene_t *scene){
         }
         else if (added_grav){
             vector_t temp_v = body_get_velocity(ball);
-            temp_v.y -= 1.0;
+            temp_v.y -= velocity_adj;
             body_set_velocity(ball, temp_v);
         }
     }
@@ -544,7 +557,7 @@ void check_accelerator(scene_t *scene, body_t *ball, double total_time){
     // accelerate ball if it is in accelerator region
     if (body_get_velocity(ball).y > 0){
     vector_t c = polygon_centroid(body_get_shape(ball));
-    
+
     if ((c.x > MID_X - ACC_WIDTH && c.x < MID_X + ACC_WIDTH)
     && (c.y > ACC_POS_Y - ACC_HEIGHT && c.y < ACC_POS_Y + 5 * ACC_HEIGHT)){
         body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y + 35});
@@ -587,9 +600,6 @@ int main(){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-        printf("SCORE: %d\n", score);
-        printf("GRAV: %f\n", g);
-        check_accelerator(scene, ball, total_time);
 
         check_star(scene, total_time);
         // check if life lost
@@ -599,6 +609,7 @@ int main(){
         }
         else{
             // PUT ANYTHING WITH BALL IN HERE -- assures no read error for null
+            check_accelerator(scene, ball, total_time);
             spring_bounds(scene);
             body_set_color(ball, phase_color(BALL_COLOR, total_time));
             temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
@@ -616,7 +627,7 @@ int main(){
             sdl_render_text((vector_t) {5.0, TEXT_DIST}, 24, "Level: ", BLACK);
             char level[10];
             sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
-            sdl_render_text((vector_t) {5.0, 24 + TEXT_DIST}, 24, level, BLACK); 
+            sdl_render_text((vector_t) {5.0, 24 + TEXT_DIST}, 24, level, BLACK);
 
             // TA Images
             //double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
@@ -625,7 +636,7 @@ int main(){
         }
 
         // TA Images
-        double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+        // double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
         //sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
         //sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
 
@@ -636,7 +647,7 @@ int main(){
         }
 
         if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
-            g = (float) score / LEVEL_CHANGER_SCORE * 100 * 9.8;
+            velocity_adj = (float) score / LEVEL_CHANGER_SCORE;
         }
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
