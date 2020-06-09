@@ -230,6 +230,8 @@ void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t c
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+    
+    TTF_CloseFont(font);
 }
 /*
 void sdl_render_image(vector_t position){

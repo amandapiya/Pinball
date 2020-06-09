@@ -94,7 +94,7 @@ const double BUMPER_COLLISION = 0.9;
 
 // POINTS STUFF
 const int REG_POINTS = 500.0;
-const int LEVEL_CHANGER_SCORE = 1000;
+const int LEVEL_CHANGER_SCORE = 5000;
 
 bool flung = false;
 bool hit_wall = false;
@@ -263,7 +263,7 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 
     body_set_centroid(ball, vec_add(body_get_centroid(ball),
         vec_multiply(0.1 * 1.5, body_get_velocity(ball))));
-    double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+    double bumper_radius = (ALLEY_SPEC.x / 1.8 - BALL_ERROR)/1.5;
     body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
     body_set_centroid(b, body_get_centroid(bumper));
     scene_t *scene = aux;
@@ -283,7 +283,7 @@ void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     body_remove(bumper);
 
     // bumper reset
-    double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+    double bumper_radius = (ALLEY_SPEC.x / 1.8 - BALL_ERROR) / 1.5;
     body_set_centroid(ball, vec_add(body_get_centroid(ball),
         vec_multiply(0.1 * 1.5, body_get_velocity(ball))));
     body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
@@ -580,8 +580,8 @@ int main(){
             swinger_tick(s2, dt);
 
             // TEXT STUFF
-/*            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK);
- *          sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
+            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK);
+            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
             char print_score[10];
             sprintf(print_score, "%d", score);
             sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);
@@ -589,7 +589,7 @@ int main(){
             sdl_render_text((vector_t) {5.0, TEXT_DIST}, 24, "Level: ", BLACK);
             char level[10];
             sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
-            sdl_render_text((vector_t) {5.0, 24 + TEXT_DIST}, 24, level, BLACK); */
+            sdl_render_text((vector_t) {5.0, 24 + TEXT_DIST}, 24, level, BLACK); 
 
             // TA Images
             //double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
