@@ -566,6 +566,11 @@ int main(){
             char level[10];
             sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
             sdl_render_text((vector_t) {5.0, 24 + TEXT_DIST}, 24, level, BLACK); */
+            
+            // TA Images
+            double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+            sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
+            //sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
         }
         
         if (lives <= 0){
