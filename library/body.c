@@ -132,6 +132,7 @@ void body_tick(body_t *body, double dt) {
     body_set_velocity(body, newv);
     vector_t translate = vec_multiply(dt, v);
     body_set_centroid(body, vec_add(translate, body_get_centroid(body)));
+    polygon_rotate(body->shape, body->rotation, body_get_centroid(body));
     body->impulse = VEC_ZERO;
     body->force = VEC_ZERO;
 }
