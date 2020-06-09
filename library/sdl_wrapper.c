@@ -210,9 +210,9 @@ void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t c
     assert(0 <= color.b && color.b <= 1);
     assert(position.x >= 0 && position.x <= WINDOW_WIDTH);
     assert(position.y >= 0 && position.y <= WINDOW_HEIGHT);
-    
+
     vector_t window_center = get_window_center();
- 
+
     TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", font_size);
     SDL_Color textColor = {color.r * 255, color.g * 255, color.b *255, 255};
     SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
@@ -230,6 +230,24 @@ void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t c
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+}
+
+void sdl_render_image(vector_t position){
+    assert(position.x >= 0 && position.x <= WINDOW_WIDTH);
+    assert(position.y >= 0 && position.y <= WINDOW_HEIGHT);
+
+    vector_t window_center = get_window_center();
+
+    SDL_Surface *image = SDL_LoadBMP("blank-original.bmp");
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
+
+    position =  get_window_position(position, window_center);
+    SDL_Rect dstrect = {position.x, WINDOW_HEIGHT - position.y, image->w / 2, image->h / 2};
+
+    SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(image);
 }
 
 void sdl_show(void) {
@@ -254,13 +272,13 @@ void sdl_render_scene(scene_t *scene, list_t *swlist){
     curr_scene = scene;
     curr_swing1 = list_get(swlist, 0);
     curr_swing2 = list_get(swlist, 1);
-    
+
     for (size_t i = 0; i < scene_bodies(scene); i++){
         body_t *b = scene_get_body(scene, i);
         if(((body_aux_t*) body_get_info(b))->is_spring) {
             curr_spring = b;
-        }   
-    }   
+        }
+    }
     sdl_show();
 }
 
@@ -276,4 +294,3 @@ double time_since_last_tick(void){
     last_clock = now;
     return difference;
 }
-
