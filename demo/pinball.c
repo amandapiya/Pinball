@@ -99,7 +99,7 @@ const double BUMPER_COLLISION = 0.9;
 
 // POINTS STUFF
 const int REG_POINTS = 500.0;
-const int LEVEL_CHANGER_SCORE = 5000;
+const int LEVEL_CHANGER_SCORE = 10000;
 
 bool flung = false;
 bool hit_wall = false;
@@ -635,20 +635,15 @@ int main(){
             //sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
         }
 
-        // TA Images
-        // double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-        //sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
-        //sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
-
-
         if (lives <= 0){
             // end game screen}
             printf("GAME OVER\n");
         }
-
-        if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
+        
+        if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE && body_get_velocity(ball).y < 1000){
             velocity_adj = (float) score / LEVEL_CHANGER_SCORE;
         }
+        
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
         sdl_clear();
