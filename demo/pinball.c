@@ -57,7 +57,7 @@ const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
 const rgb_color_t STAR_COLOR = {1.0, 1.0, 0.0};
-const vector_t STAR_VELOCITY_INIT = {15, 0};
+const vector_t STAR_VELOCITY_INIT = {-15, 0};
 
 // Ball constants
 const double BALL_ERROR = 15.0;
