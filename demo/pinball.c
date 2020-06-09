@@ -70,7 +70,7 @@ const double SPRING_SPACE = 5.0;
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
-const double g = 9.8;
+double g = 9.8;
 
 // Swinger constants
 const double SWINGER_ELASTICITY = 1.5;
@@ -91,13 +91,13 @@ const double BUMPER_COLLISION = 0.9;
 
 // POINTS STUFF
 const int REG_POINTS = 500.0;
+const int LEVEL_CHANGER_SCORE = 1000;
 
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false;
 int lives = 3;
 int score = 0;
-double velocity_changer = 1.0;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -326,13 +326,13 @@ void make_bumpers(scene_t *scene){
     }
 
     body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
-    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x + (0.7 * delta_x), alley_top - 15 * SPACING});
+    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.7 * delta_x), alley_top - 15 * SPACING});
     scene_add_body(scene, black_hole);
     create_physics_collision(scene, BUMPER_COLLISION, ball, black_hole);
     create_collision(scene, ball, black_hole, (collision_handler_t) restart_bumper, scene, NULL);
 
     body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
-    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x - (0.7 * delta_x), alley_top - 15 * SPACING});
+    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.7 * delta_x), alley_top - 15 * SPACING});
     scene_add_body(scene, gain_life);
     create_physics_collision(scene, BUMPER_COLLISION, ball, gain_life);
     create_collision(scene, ball, gain_life, (collision_handler_t) extra_life, scene, NULL);
@@ -376,7 +376,7 @@ void spring_bounds(scene_t *scene){
         }
         else if (added_grav){
             vector_t temp_v = body_get_velocity(ball);
-            temp_v.y -= velocity_changer;
+            temp_v.y -= 1.0;
             body_set_velocity(ball, temp_v);
         }
     }
@@ -498,7 +498,17 @@ void check_accelerator(body_t *ball){
 }
 
 void check_star(scene_t *scene){
-    
+    body_t *star = scene_get_body(scene, 0);
+    for (size_t i = 0; i < scene_bodies(scene); i++){
+        star = scene_get_body(scene, i);
+        if(body_get_rotation(star) > 0) {
+            double x = polygon_centroid(body_get_shape(star)).x;
+            if (x > 770 || x < 220){
+                body_set_velocity(star,(vector_t){-1 * body_get_velocity(star).x, 0});
+            }
+            return;
+        }
+    }
 }
 
 int main(){
@@ -542,23 +552,27 @@ int main(){
             temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
             swinger_tick(s1, dt);
             swinger_tick(s2, dt);
-        
+
             // TEXT STUFF
 /*            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK); 
  *          sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
             char print_score[10];
             sprintf(print_score, "%d", score);
-            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);*/
+            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);
+            
+            sdl_render_text((vector_t) {5.0, TEXT_DIST}, 24, "Level: ", BLACK);
+            char level[10];
+            sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
+            sdl_render_text((vector_t) {5.0, 24 + TEXT_DIST}, 24, level, BLACK); */
         }
-       
+        
         if (lives <= 0){
             // end game screen}
             printf("GAME OVER\n");
         }
 
-        int LEVEL_CHANGER_SCORE = 1000;
         if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
-            velocity_changer = score / LEVEL_CHANGER_SCORE * velocity_changer;
+            g = (float) score / LEVEL_CHANGER_SCORE * 100 * 9.8;
         }
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);

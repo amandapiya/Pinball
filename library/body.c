@@ -90,6 +90,10 @@ void *body_get_info(body_t *body){
     return body->info;
 }
 
+double body_get_rotation(body_t *body){
+    return body->rotation;
+}
+
 void body_set_info(body_t *body, void *new_info){
     body->info = new_info;
     body->info_freer = free;

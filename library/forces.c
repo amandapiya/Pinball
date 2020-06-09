@@ -14,7 +14,7 @@
 const double TOO_CLOSE_GRAV = 5.0;
 const float COLOR_UPDATE = 0.1;
 // number of times find collision must return false before another collision with a wall can occur
-const double COLLISION_TRACKER = 5;
+const double COLLISION_TRACKER = 5.0;
 const double SWINGER_COLLISION_TRACKER = 3;
 const double SWINGER_IMPULSE_MULTIPLIER = 0.7;
 
