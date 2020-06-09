@@ -607,10 +607,10 @@ int main(){
         double dt = time_since_last_tick();
         total_time += dt;
 
-        update_star(scene, total_time);
         if (!gate){
             gate = check_gate(scene, ball);
         }
+        update_star(scene, total_time);
         // check if life lost
         if (get_player(scene) == NULL){
             lives--;
