@@ -100,7 +100,7 @@ const double BUMPER_COLLISION = 0.9;
 // POINTS STUFF
 const int REG_POINTS = 500.0;
 const int LEVEL_CHANGER_SCORE = 5000;
-
+const double TEXT_DIST = 45.0;
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false;
@@ -221,14 +221,6 @@ void make_pinball_border(scene_t *scene){
 
     alley_top += ALLEY_WALL_SPEC.y;
 
-    /*
-    body_t *bridge = make_trapezoid(CORNER_SPEC.x/2.45, CORNER_SPEC.y/2.45, SPACING, -1, BLACK, 1);
-    body_set_centroid(bridge, (vector_t) {RIGHT_WALL_POINT.x + BRIDGE_WIDTH - SPACING/2, alley_top});
-    list_add(pinball_border, bridge);
-    body_t *bridge2 = make_trapezoid(CORNER_SPEC.x/3, CORNER_SPEC.y/3, SPACING, 1, BLACK, 1);
-    body_set_centroid(bridge2, (vector_t) {RIGHT_WALL_POINT.x - SPACING/2, alley_top});
-    list_add(pinball_border, bridge2);
-      */
     // Sets up outer walls
     body_t *wall_left = make_box(SPACING, WALL_HEIGHT.x, BLACK, 0);
     body_t *wall_right = make_box(SPACING, WALL_HEIGHT.y, BLACK, 0);
@@ -565,7 +557,7 @@ void check_accelerator(scene_t *scene, body_t *ball, double total_time){
     }
 }
 
-void check_star(scene_t *scene, double total_time){
+void update_star(scene_t *scene, double total_time){
     list_t *star_list = get_stars(scene);
     for (size_t i = 0; i < list_size(star_list); i++){
         body_t *star = list_get(star_list, i);
@@ -577,10 +569,23 @@ void check_star(scene_t *scene, double total_time){
     }
 }
 
+bool check_gate(scene_t *scene, body_t *ball){
+    vector_t v = body_get_centroid(ball);
+    if (v.y - ALLEY_SPEC.x / 2 - BALL_ERROR > ALLEY_POINT.y + ALLEY_SPEC.y/2 + ALLEY_WALL_SPEC.y){
+        body_t *gate = make_box(ALLEY_SPEC.x, SPACING, BLACK, 0);
+        body_set_centroid(gate, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + ALLEY_SPEC.y/2}); //RIGHT_WALL_POINT.x + ALLEY_SPEC.x/2 - 1.4*SPACING
+        scene_add_body(scene, gate);
+        create_physics_collision(scene, BUMPER_COLLISION, ball, gate);
+        aux_t *bumper_aux = aux_init(REG_POINTS, ball, gate);
+        create_collision(scene, ball, gate, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
+        return true;
+    }
+    return false;
+}
+
 int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
     scene_t *scene = scene_init();
-    double total_time = 0.0;
     reset_game(scene);
 
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
@@ -595,17 +600,22 @@ int main(){
 
     sdl_on_key(on_key);
 
-    double TEXT_DIST = 45.0;
+    double total_time = 0.0;
+    bool gate = false;
     while (!sdl_is_done()){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
 
-        check_star(scene, total_time);
+        update_star(scene, total_time);
+        if (!gate){
+            gate = check_gate(scene, ball);
+        }
         // check if life lost
         if (get_player(scene) == NULL){
             lives--;
             reset_game(scene);
+            gate = false;
         }
         else{
             // PUT ANYTHING WITH BALL IN HERE -- assures no read error for null
@@ -642,7 +652,7 @@ int main(){
 
 
         if (lives <= 0){
-            // end game screen}
+            // end game screen
             printf("GAME OVER\n");
         }
 
