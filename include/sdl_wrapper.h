@@ -20,6 +20,7 @@
  * #define KEY_PRESSED 0
  * #define KEY_RELEASED 1
  */
+ 
 typedef enum {
     KEY_PRESSED,
     KEY_RELEASED
@@ -83,6 +84,14 @@ void sdl_show(void);
  * @param color the color of the text
  */
 void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t color);
+
+/**
+ * Renders images of TAs
+ *
+ * @param position center of the text rectangle
+ * @param file the name of the image file
+ */
+void sdl_render_image(vector_t position);
 
 /**
  * Draws all bodies in a scene.
