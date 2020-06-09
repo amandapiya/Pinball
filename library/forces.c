@@ -14,14 +14,9 @@
 const double TOO_CLOSE_GRAV = 5.0;
 const float COLOR_UPDATE = 0.1;
 // number of times find collision must return false before another collision with a wall can occur
-<<<<<<< HEAD
-const double COLLISION_TRACKER = 3.0;
-const double SWINGER_COLLISION_TRACKER = 3;
-=======
 const int COLLISION_TRACKER = 5;
 const int SWINGER_COLLISION_TRACKER = 3;
 const double SWINGER_IMPULSE = 10; // ADJUSTABLE
->>>>>>> refs/remotes/origin/master
 const double SWINGER_IMPULSE_MULTIPLIER = 0.7;
 
 void gravity_force(aux_t *aux){
