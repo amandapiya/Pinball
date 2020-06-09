@@ -204,7 +204,7 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color){
 }
 
 // might need to double check clearing stuff idk yet
-void sdl_render_text(vector_t position, char* text, rgb_color_t color){
+void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t color){
     assert(0 <= color.r && color.r <= 1);
     assert(0 <= color.g && color.g <= 1);
     assert(0 <= color.b && color.b <= 1);
@@ -213,16 +213,15 @@ void sdl_render_text(vector_t position, char* text, rgb_color_t color){
     
     vector_t window_center = get_window_center();
  
-    TTF_Font *font = TTF_OpenFont("/Users/amypham/OneDrive - California Institute of Technology/Freshman Year/Spring Term/CS3/pinball/fonts/Minecraft.ttf", 24);
-//    TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", 300);
-    SDL_Color textColor = {color.r * 255, color.g * 255, color.b *255};
+    TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", font_size);
+    SDL_Color textColor = {color.r * 255, color.g * 255, color.b *255, 255};
     SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
     SDL_Rect* message_rect = malloc(sizeof(SDL_Rect));
     position =  get_window_position(position, window_center);
     message_rect->x = position.x;
-    message_rect->y = position.y;
+    message_rect->y = WINDOW_HEIGHT - position.y;
     message_rect->w = surface->w;
     message_rect->h = surface->h;
 
@@ -231,7 +230,6 @@ void sdl_render_text(vector_t position, char* text, rgb_color_t color){
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
-    
 }
 
 void sdl_show(void) {
@@ -239,7 +237,7 @@ void sdl_show(void) {
 }
 
 void sdl_render_scene(scene_t *scene, list_t *swlist){
-    sdl_clear();
+//    sdl_clear();
     size_t body_count = scene_bodies(scene);
     for (size_t i = 0; i < body_count; i++) {
         body_t *body = scene_get_body(scene, i);

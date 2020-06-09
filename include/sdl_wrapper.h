@@ -78,10 +78,11 @@ void sdl_show(void);
  * Renders text
  *
  * @param position center of the text rectangle
+ * @param size the size of the textbox
  * @param text the text to print
  * @param color the color of the text
  */
-void sdl_render_text(vector_t position, char* text, rgb_color_t color);
+void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t color);
 
 /**
  * Draws all bodies in a scene.

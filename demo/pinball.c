@@ -86,13 +86,13 @@ const double WALL_COLLISION = 0.4;
 const double BUMPER_COLLISION = 0.9;
 
 // POINTS STUFF
-const double REG_POINTS = 500.0;
+const int REG_POINTS = 500.0;
 
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false;
 int lives = 3;
-double score = 0.0;
+int score = 0;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -335,8 +335,8 @@ void make_bumpers(scene_t *scene){
     body_set_rotation(rotating_star, .1);
     body_set_velocity(rotating_star, (vector_t){15, 0});
     body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top + 1.1 * WALL_HEIGHT.y});
-    scene_add_body(scene, rotating_star);
-    create_physics_collision(scene, BUMPER_COLLISION, ball, rotating_star);
+//    scene_add_body(scene, rotating_star);
+//    create_physics_collision(scene, BUMPER_COLLISION, ball, rotating_star);
 }
 
 void spring_bounds(scene_t *scene){
@@ -509,22 +509,25 @@ int main(){
     *sw2counter = 0;
     
     sdl_on_key(on_key);
+
+    /* 
+    for (int i = 0; i < 4; i++){
+        body_t *box = make_box(BOX_SPEC.x, BOX_SPEC.y, BLACK, 0);
+        body_t *inner_box = make_box(BOX_SPEC.x - SPACING_BOXES, BOX_SPEC.y - SPACING_BOXES, INNER_COLOR, 0);
+        body_set_centroid(box, (vector_t) {BOX_POINT.x, BOX_POINT.y - i * (SPACING_BOX_GAP + BOX_SPEC.y)});
+        body_set_centroid(inner_box, (vector_t) {BOX_POINT.x, BOX_POINT.y - i * (SPACING_BOX_GAP + BOX_SPEC.y)});
+        scene_add_body(scene, box);
+        scene_add_body(scene, inner_box);
+    }
+    */
+
+    double TEXT_DIST = 45.0;
     while (!sdl_is_done()){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-        //        sdl_render_text((vector_t) {300, 200}, "AMY PHAM", (rgb_color_t) {0, 0, 0});
+        //sdl_render_text((vector_t) {300, 200}, "AMY PHAM", (rgb_color_t) {0, 0, 0});
         //   check_accelerator(ball);
-
-
-        /*
-        if (hit_wall == false && polygon_centroid(body_get_shape(ball)).x < 770){ // TODO: make more accurate
-            hit_wall = true;
-        }
-        if (hit_wall == true){
-            body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y - 15});
-        }
-*/
 
         // check if life lost
         if (get_player(scene) == NULL){    
@@ -539,8 +542,20 @@ int main(){
             temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
             swinger_tick(s1, dt);
             swinger_tick(s2, dt);
+           /* 
+const rgb_color_t INNER_COLOR = {1, 1, 1};
+const vector_t BOX_SPEC = {200, 90};
+const vector_t BOX_POINT = {MAX_X - 150 * 1.15, MAX_Y - 90 * 1.15};
+const double SPACING_BOXES = 12;
+*/
+        // TEXT STUFF
+        sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK);
+        sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
+        char print_score[10];
+        sprintf(print_score, "%d", score);
+        sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);
         }
-
+        
         if (lives <= 0){
             // end game screen}
             printf("GAME OVER\n");
@@ -548,6 +563,7 @@ int main(){
         
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
+        sdl_clear();
     }
 
     swinger_free(s1);
