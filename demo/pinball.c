@@ -57,6 +57,9 @@ const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
 const rgb_color_t STAR_COLOR = {1.0, 1.0, 0.0};
+const rgb_color_t ACC_ONE = {1.0, 0.2, 1.0};
+const rgb_color_t ACC_TWO = {0.95, 0.5, 0.95};
+const rgb_color_t ACC_THREE = {0.9, 0.8, 0.9};
 const vector_t STAR_VELOCITY_INIT = {-30, 0};
 const vector_t STAR_BOUNDS = {280, 770};
 const vector_t STAR_SPEC = {8, 35};
@@ -84,7 +87,7 @@ const double SWINGER_LENGTH = 110;
 const double LEFT_SWINGER_ANG = 11*M_PI/6;
 const double RIGHT_SWINGER_ANG = 7*M_PI/6;
 const rgb_color_t SWINGER_COLOR = {1, 0, 0};
-
+const double BASE_MOMENTUM = 5; // ADJUSTABLE
 const double ACC_WIDTH = 70;
 const double ACC_HEIGHT = 20;
 const double ACC_POS_Y = 250;
@@ -319,7 +322,7 @@ void make_bumpers(scene_t *scene){
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
     double delta_x = CONE_POINT.x - (LEFT_WALL_POINT.x - CORNER_DELTA + 15 * SPACING);
     list_t *bumper_list = list_init(1, (free_func_t) body_free);
-    list_t *star_list = list_init(1, (free_func_t) body_free);
+    // list_t *star_list = list_init(1, (free_func_t) body_free);
     body_t *ball = get_player(scene);
 
     /*
@@ -431,13 +434,13 @@ void spring_fling(void *key_handler_aux){
 
 void left_swinger(double held_time, void *key_handler_aux){
     swinger_t *s = key_aux_get_swinger1(key_handler_aux);
-    double momentum = held_time * MOMENTUM_CONSTANT;
+    double momentum = BASE_MOMENTUM +  held_time * MOMENTUM_CONSTANT;
     swinger_add_momentum(s, momentum);
 }
 
 void right_swinger(double held_time, void *key_handler_aux){
         swinger_t *s2 = key_aux_get_swinger2(key_handler_aux);
-        double momentum2 = -1 * held_time * MOMENTUM_CONSTANT;
+        double momentum2 = -1 * BASE_MOMENTUM +  -1 * held_time * MOMENTUM_CONSTANT;
         swinger_add_momentum(s2, momentum2);
 }
 
@@ -481,11 +484,11 @@ void reset_game(scene_t *scene){
     }
 
     // add accelerators
-    body_t *acc1 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y}, (rgb_color_t) {1, 0, 1});
+    body_t *acc1 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y}, ACC_ONE);
     scene_add_body(scene, acc1);
-    body_t *acc2 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + BALL_ERROR}, (rgb_color_t) {.8, 0, .8});
+    body_t *acc2 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + BALL_ERROR}, ACC_TWO);
     scene_add_body(scene, acc2);
-    body_t *acc3 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + 2 * BALL_ERROR}, (rgb_color_t) {.6, 0, .6});
+    body_t *acc3 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + 2 * BALL_ERROR}, ACC_THREE);
     scene_add_body(scene, acc3);
 
     // add ball
@@ -517,11 +520,35 @@ void reset_game(scene_t *scene){
     show_lives(scene);
 }
 
-void check_accelerator(body_t *ball){
+void check_accelerator(scene_t *scene, body_t *ball, double total_time){
+    // accelerator colors
+    int acc_num = 0;
+    for (size_t i = 0; i < scene_bodies(scene); i++){
+        body_t *acc = scene_get_body(scene, i);
+        if (list_size(body_get_shape(acc)) == 6){
+            if (acc_num == 0){
+                body_set_color(acc, phase_accelerator(ACC_ONE, total_time));
+                acc_num ++;
+            }
+            else if (acc_num == 1){
+                body_set_color(acc, phase_accelerator(ACC_TWO, total_time));
+                acc_num ++;
+            }
+            else {
+                body_set_color(acc, phase_accelerator(ACC_THREE, total_time));
+                break;
+            }
+        }
+    }
+
+    // accelerate ball if it is in accelerator region
+    if (body_get_velocity(ball).y > 0){
     vector_t c = polygon_centroid(body_get_shape(ball));
-    if ((c.x < MID_X - ACC_WIDTH || c.x < MID_X + ACC_WIDTH)
-    && (c.y < ACC_POS_Y - ACC_HEIGHT || c.y < ACC_POS_Y + 5 * ACC_HEIGHT)){
+    
+    if ((c.x > MID_X - ACC_WIDTH && c.x < MID_X + ACC_WIDTH)
+    && (c.y > ACC_POS_Y - ACC_HEIGHT && c.y < ACC_POS_Y + 5 * ACC_HEIGHT)){
         body_set_velocity(ball, (vector_t) {body_get_velocity(ball).x, body_get_velocity(ball).y + 35});
+    }
     }
 }
 
@@ -562,7 +589,7 @@ int main(){
         total_time += dt;
         printf("SCORE: %d\n", score);
         printf("GRAV: %f\n", g);
-        //   check_accelerator(ball);
+        check_accelerator(scene, ball, total_time);
 
         check_star(scene, total_time);
         // check if life lost

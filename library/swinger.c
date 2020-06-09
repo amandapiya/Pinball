@@ -14,6 +14,7 @@ const double INCREMENT = 0.1;
 const double SWING_EPSILON = 0.01;
 const int SWINGER_MASS = 3;
 const int GRAVITY = 10;
+const double TORQUE_CAP = 10; // ADJUSTABLE
 const double SEMICIRCLE_MIN = M_PI/2;
 const double SEMICIRCLE_MAX = 3*M_PI/2;
 const double LEFT_SWINGER_ANGLE = 11*M_PI/6;
@@ -118,6 +119,9 @@ void swinger_add_momentum(swinger_t *swinger, double m){
 
 void swinger_tick(swinger_t *swinger, double dt){
     swinger->torque = swinger->torque + (swinger->momentum/SWINGER_MASS);
+    if (swinger->torque > TORQUE_CAP){ // SWINGER SPEED CAP
+	swinger->torque = TORQUE_CAP;
+    }
     double rotation_angle = dt * swinger->torque;
     swinger->momentum = 0;
     if ((fabs(swinger->start_angle - LEFT_SWINGER_ANGLE) < SWING_EPSILON && swinger->angle < LEFT_SWINGER_ANGLE) ||
