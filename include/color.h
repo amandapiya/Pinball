@@ -21,4 +21,6 @@ rgb_color_t phase_color(rgb_color_t og_color, double time_passed);
 
 rgb_color_t phase_yellow(rgb_color_t og_color, double time_passed);
 
+rgb_color_t phase_accelerator(rgb_color_t og_color, double time_passed);
+
 #endif // #ifndef __COLOR_H__
