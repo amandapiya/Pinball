@@ -21,11 +21,12 @@ const double TRAP_SCALE = 1.2;
 const double EPSILON = 0.001;
 const double ANGLE_BETWEEN_POINTS = 0.01;
 
-const body_aux_t PLAYER_AUX = {true, false, false, false};    //TFFF
-const body_aux_t GENERIC_AUX = {false, false, false, false};  //FFFF
-const body_aux_t SPRING_AUX = {false, true, false, false};    //FTFF
-const body_aux_t STAR_AUX = {false, false, true, false};   //FFTF
-const body_aux_t EARTH_AUX = {false, false, false, true};     //FFFT
+const body_aux_t PLAYER_AUX = {true, false, false, false, false};    //TFFFF
+const body_aux_t SPRING_AUX = {false, true, false, false, false};    //FTFFF
+const body_aux_t STAR_AUX = {false, false, true, false, false};   //FFTFF
+const body_aux_t EARTH_AUX = {false, false, false, true, false};     //FFFTF
+const body_aux_t BRIDGE_AUX = {false, false, false, false, true};  //FFFFT
+const body_aux_t GENERIC_AUX = {false, false, false, false, false};  //F
 
 body_t *make_box(double width, double height, rgb_color_t color, int spring){
     vector_t centroid = VEC_ZERO;
@@ -47,6 +48,9 @@ body_t *make_box(double width, double height, rgb_color_t color, int spring){
     double mass = 200.0;
     if (spring == 1){
         *aux = SPRING_AUX;
+    }else if (spring == 2){
+        *aux = BRIDGE_AUX;
+        mass = INFINITY;
     }else{
         *aux = GENERIC_AUX;
         mass = INFINITY;

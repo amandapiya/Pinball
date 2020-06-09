@@ -149,6 +149,16 @@ body_t *get_earth(scene_t *scene){
     return NULL;
 }
 
+body_t *get_bridge(scene_t *scene){
+    for (size_t i = 0; i < scene_bodies(scene); i++){
+        body_t *b = scene_get_body(scene, i);
+        if(((body_aux_t*) body_get_info(b))->is_bridge) {
+            return b;
+        }
+    }
+    return NULL;
+}
+
 void show_lives(scene_t *scene){
     for (int i = 0; i < lives - 1; i++){
         double spacing = 15.0;
@@ -263,11 +273,14 @@ void points(body_t *body1, body_t *body2, vector_t axis, void *aux){
     score += aux_get_constant(aux);
 }
 
-void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
+void extra_life(scene_t *scene1, body_t *ball, body_t *bumper, vector_t axis, void *aux){
     lives += 1;
 
-    if (body_is_removed(bumper)) return;
-
+    if (body_is_removed(bumper)) {
+      body_t *bridge = get_bridge(scene1);
+      body_remove(bridge);
+      return;
+    }
     body_remove(bumper);
 
     body_set_centroid(ball, vec_add(body_get_centroid(ball),
@@ -285,7 +298,8 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 
 // no lives lost; ball just restarts on the spring
 void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
-    if (body_is_removed(bumper)) return;
+    if (body_is_removed(bumper))
+    return;
     flung = false;
     added_grav = false;
 
@@ -572,7 +586,7 @@ void update_star(scene_t *scene, double total_time){
 bool check_gate(scene_t *scene, body_t *ball){
     vector_t v = body_get_centroid(ball);
     if (v.y - ALLEY_SPEC.x / 2 - BALL_ERROR > ALLEY_POINT.y + ALLEY_SPEC.y/2 + ALLEY_WALL_SPEC.y){
-        body_t *gate = make_box(ALLEY_SPEC.x, SPACING, BLACK, 0);
+        body_t *gate = make_box(ALLEY_SPEC.x, SPACING, BLACK, 2);
         body_set_centroid(gate, (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y + ALLEY_SPEC.y/2}); //RIGHT_WALL_POINT.x + ALLEY_SPEC.x/2 - 1.4*SPACING
         scene_add_body(scene, gate);
         create_physics_collision(scene, BUMPER_COLLISION, ball, gate);
