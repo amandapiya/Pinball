@@ -6,7 +6,7 @@
 typedef struct {
     bool is_player;
     bool is_spring;
-    bool is_bumper;
+    bool is_star;
     bool is_earth;
 } body_aux_t;
 

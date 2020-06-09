@@ -24,7 +24,7 @@ const double ANGLE_BETWEEN_POINTS = 0.01;
 const body_aux_t PLAYER_AUX = {true, false, false, false};    //TFFF
 const body_aux_t GENERIC_AUX = {false, false, false, false};  //FFFF
 const body_aux_t SPRING_AUX = {false, true, false, false};    //FTFF
-const body_aux_t SPECIAL_AUX = {false, false, true, false};   //FFTF
+const body_aux_t STAR_AUX = {false, false, true, false};   //FFTF
 const body_aux_t EARTH_AUX = {false, false, false, true};     //FFFT
 
 body_t *make_box(double width, double height, rgb_color_t color, int spring){
@@ -109,7 +109,7 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t colo
 body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
     vector_t center = VEC_ZERO;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = SPECIAL_AUX;
+    *aux = STAR_AUX;
     list_t *vertices = list_init(1, free);
     double angle_between_vertices = M_PI/(num_arms);
     double theta = 0;
@@ -135,7 +135,7 @@ body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
 
 body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t color){
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = SPECIAL_AUX;
+    *aux = GENERIC_AUX;
    	list_t *vertices = list_init(1, free);
     vector_t *v1 = malloc(sizeof(*v1));
     *v1 = (vector_t) {center.x, center.y};
