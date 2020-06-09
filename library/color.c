@@ -37,3 +37,14 @@ rgb_color_t phase_color(rgb_color_t og_color, double time_passed){
     }
     return (rgb_color_t){new_r, new_g, new_b};
 }
+
+rgb_color_t phase_yellow(rgb_color_t og_color, double time_passed){
+    float new_g = og_color.g;
+    if (og_color.g > 0){ // og green color == 1
+        new_g -= fabs(sin(time_passed));
+    }
+    else { // og green color == 0
+        new_g = fabs(sin(time_passed));
+    }
+    return (rgb_color_t){og_color.r, new_g, og_color.b};
+}

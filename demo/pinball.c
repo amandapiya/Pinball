@@ -56,7 +56,8 @@ const vector_t RIGHT_WALL_POINT = {831, 396};
 const vector_t LOSING_SPEC = {250, 20};
 const rgb_color_t BALL_COLOR  = {1.0, 0.0, 1.0};
 const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
-const vector_t STAR_VELOCITY_INIT = {15, 0};
+const rgb_color_t STAR_COLOR = {1.0, 1.0, 0.0};
+const vector_t STAR_VELOCITY_INIT = {-15, 0};
 
 // Ball constants
 const double BALL_ERROR = 20.0;
@@ -337,7 +338,7 @@ void make_bumpers(scene_t *scene){
     create_physics_collision(scene, BUMPER_COLLISION, ball, gain_life);
     create_collision(scene, ball, gain_life, (collision_handler_t) extra_life, scene, NULL);
 
-    body_t *rotating_star = make_star(8, 40, BLACK);
+    body_t *rotating_star = make_star(8, 40, STAR_COLOR);
     body_set_rotation(rotating_star, .1);
     body_set_velocity(rotating_star, STAR_VELOCITY_INIT);
     body_set_centroid(rotating_star, (vector_t) {CONE_POINT.x, alley_top - 5 * SPACING});
@@ -497,11 +498,12 @@ void check_accelerator(body_t *ball){
     }
 }
 
-void check_star(scene_t *scene){
+void check_star(scene_t *scene, double total_time){
     body_t *star = scene_get_body(scene, 0);
     for (size_t i = 0; i < scene_bodies(scene); i++){
         star = scene_get_body(scene, i);
         if(body_get_rotation(star) > 0) {
+            body_set_color(star, phase_yellow(STAR_COLOR, total_time));
             double x = polygon_centroid(body_get_shape(star)).x;
             if (x > 770 || x < 220){
                 body_set_velocity(star,(vector_t){-1 * body_get_velocity(star).x, 0});
@@ -538,7 +540,7 @@ int main(){
         printf("GRAV: %f\n", g);
         //   check_accelerator(ball);
 
-        check_star(scene);
+        check_star(scene, total_time);
         // check if life lost
         if (get_player(scene) == NULL){
             lives--;
