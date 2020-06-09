@@ -59,7 +59,7 @@ const rgb_color_t BUMPER_COLOR  = {0.6, 0.6, 0.6};
 const vector_t STAR_VELOCITY_INIT = {15, 0};
 
 // Ball constants
-const double BALL_ERROR = 15.0;
+const double BALL_ERROR = 20.0;
 const double BALL_MASS = 1.0;
 const double BALL_HEIGHT = 65.0;
 
@@ -97,6 +97,7 @@ bool hit_wall = false;
 bool added_grav = false;
 int lives = 3;
 int score = 0;
+double velocity_changer = 1.0;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -260,7 +261,6 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 
 // no lives lost; ball just restarts on the spring
 void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
-    printf("RESTART BUMPER -------\n");
     if (body_is_removed(bumper)) return;
     flung = false;
     added_grav = false;
@@ -376,7 +376,7 @@ void spring_bounds(scene_t *scene){
         }
         else if (added_grav){
             vector_t temp_v = body_get_velocity(ball);
-            temp_v.y -= 1.0;
+            temp_v.y -= velocity_changer;
             body_set_velocity(ball, temp_v);
         }
     }
@@ -524,6 +524,8 @@ int main(){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
+        printf("SCORE: %d\n", score);
+        printf("GRAV: %f\n", g);
         //   check_accelerator(ball);
 
         check_star(scene);
@@ -542,17 +544,22 @@ int main(){
             swinger_tick(s2, dt);
         
             // TEXT STUFF
-            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK); sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
+/*            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK); 
+ *          sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
             char print_score[10];
             sprintf(print_score, "%d", score);
-            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);
+            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);*/
         }
-        
+       
         if (lives <= 0){
             // end game screen}
             printf("GAME OVER\n");
         }
 
+        int LEVEL_CHANGER_SCORE = 1000;
+        if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
+            velocity_changer = score / LEVEL_CHANGER_SCORE * velocity_changer;
+        }
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
         sdl_clear();
