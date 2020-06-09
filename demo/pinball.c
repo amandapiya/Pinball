@@ -82,7 +82,7 @@ const double ACC_WIDTH = 70;
 const double ACC_HEIGHT = 20;
 const double ACC_POS_Y = 250;
 
-const double WALL_COLLISION = 0.60;
+const double WALL_COLLISION = 0.4;
 const double BUMPER_COLLISION = 0.9;
 
 // POINTS STUFF
