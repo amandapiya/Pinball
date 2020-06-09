@@ -76,7 +76,8 @@ const double SPRING_SPACE = 5.0;
 // Grav constants
 const double G = 6.67E11;
 const double M = 6E24;
-double g = 9.8;
+const double g = 9.8;
+double velocity_adj = 1.0;
 
 // Swinger constants
 const double SWINGER_ELASTICITY = 1.5;
@@ -407,7 +408,7 @@ void spring_bounds(scene_t *scene){
         }
         else if (added_grav){
             vector_t temp_v = body_get_velocity(ball);
-            temp_v.y -= 1.0;
+            temp_v.y -= velocity_adj;
             body_set_velocity(ball, temp_v);
         }
     }
@@ -587,9 +588,6 @@ int main(){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-        printf("SCORE: %d\n", score);
-        printf("GRAV: %f\n", g);
-        check_accelerator(scene, ball, total_time);
 
         check_star(scene, total_time);
         // check if life lost
@@ -599,6 +597,7 @@ int main(){
         }
         else{
             // PUT ANYTHING WITH BALL IN HERE -- assures no read error for null
+            check_accelerator(scene, ball, total_time);
             spring_bounds(scene);
             body_set_color(ball, phase_color(BALL_COLOR, total_time));
             temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
@@ -636,7 +635,7 @@ int main(){
         }
 
         if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
-            g = (float) score / LEVEL_CHANGER_SCORE * 100 * 9.8;
+            velocity_adj = (float) score / LEVEL_CHANGER_SCORE;
         }
         scene_tick(scene, dt);
         sdl_render_scene(scene, swingers);
