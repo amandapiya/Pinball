@@ -498,7 +498,17 @@ void check_accelerator(body_t *ball){
 }
 
 void check_star(scene_t *scene){
-    
+    body_t *star = scene_get_body(scene, 0);
+    for (size_t i = 0; i < scene_bodies(scene); i++){
+        star = scene_get_body(scene, i);
+        if(body_get_rotation(star) > 0) {
+            double x = polygon_centroid(body_get_shape(star)).x;
+            if (x > 770 || x < 120){
+                body_set_velocity(star,(vector_t){-1 * body_get_velocity(star).x, 0});
+            }
+            return;
+        }
+    }
 }
 
 int main(){
@@ -540,14 +550,14 @@ int main(){
             temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
             swinger_tick(s1, dt);
             swinger_tick(s2, dt);
-        
+
             // TEXT STUFF
             sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 4 * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Lives:", BLACK); sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, "Points:", BLACK);
             char print_score[10];
             sprintf(print_score, "%d", score);
             sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, 24, print_score, BLACK);
         }
-        
+
         if (lives <= 0){
             // end game screen}
             printf("GAME OVER\n");

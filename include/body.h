@@ -103,6 +103,8 @@ vector_t body_get_impulse(body_t *body);
 
 void *body_get_info(body_t *body);
 
+double body_get_rotation(body_t *body);
+
 void body_set_info(body_t *body, void *new_info);
 
 void body_set_color(body_t *body, rgb_color_t new_color);
