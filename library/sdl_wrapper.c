@@ -212,8 +212,9 @@ void sdl_render_text(vector_t position, char* text, rgb_color_t color){
     assert(position.y >= 0 && position.y <= WINDOW_HEIGHT);
     
     vector_t window_center = get_window_center();
-    
-    TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", 300);
+ 
+    TTF_Font *font = TTF_OpenFont("/Users/amypham/OneDrive - California Institute of Technology/Freshman Year/Spring Term/CS3/pinball/fonts/Minecraft.ttf", 24);
+//    TTF_Font* font = TTF_OpenFont("fonts/Minecraft.ttf", 300);
     SDL_Color textColor = {color.r * 255, color.g * 255, color.b *255};
     SDL_Surface *surface = TTF_RenderText_Solid(font, text, textColor);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);

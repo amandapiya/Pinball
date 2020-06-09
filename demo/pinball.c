@@ -114,6 +114,16 @@ body_t *get_spring(scene_t *scene){
     return NULL;
 }
 
+body_t *get_earth(scene_t *scene){
+    for (size_t i = 0; i < scene_bodies(scene); i++){
+        body_t *b = scene_get_body(scene, i);
+        if(((body_aux_t*) body_get_info(b))->is_earth) {
+            return b;
+        }
+    }
+    return NULL;
+}
+
 void show_lives(scene_t *scene){
     for (int i = 0; i < lives - 1; i++){
         double spacing = 15.0;
@@ -230,12 +240,10 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     body_remove(bumper);
    
     body_set_centroid(ball, vec_add(body_get_centroid(ball),
-        vec_multiply(0.1 * 2, body_get_velocity(ball))));
+        vec_multiply(0.1 * 1.5, body_get_velocity(ball))));
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-    double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
-    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
     body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
-    body_set_centroid(b, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    body_set_centroid(b, body_get_centroid(bumper));
     scene_t *scene = aux;
     scene_add_body(scene, b);
     show_lives(scene);
@@ -246,19 +254,19 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 
 // no lives lost; ball just restarts on the spring
 void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
+    printf("RESTART BUMPER -------\n");
     if (body_is_removed(bumper)) return;
     flung = false;
+    added_grav = false;
 
     body_remove(bumper);
    
     // bumper reset
     double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-    double delta_x = CONE_POINT.x - (LEFT_WALL_SPEC.x - CORNER_DELTA + 15 * SPACING);
-    double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
     body_set_centroid(ball, vec_add(body_get_centroid(ball),
-        vec_multiply(0.1 * 2, body_get_velocity(ball))));
+        vec_multiply(0.1 * 1.5, body_get_velocity(ball))));
     body_t *b = make_circle(bumper_radius, 0, 2 * M_PI, BUMPER_COLOR, INFINITY, 0);
-    body_set_centroid(b, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    body_set_centroid(b, body_get_centroid(bumper));
     scene_t *scene = aux;
     scene_add_body(scene, b);
     create_physics_collision(scene, BUMPER_COLLISION, ball, b);
@@ -266,13 +274,23 @@ void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
 
     // ball and spring reset 
+    body_t *earth = get_earth(scene); 
+    body_remove(earth);
+    
     body_set_velocity(ball, VEC_ZERO);
     body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT}));
-    body_t *spring = get_spring(scene);
+    body_t *s = get_spring(scene);
+    body_remove(s);
+
+    rgb_color_t spring_color = (rgb_color_t) {0.41, 0.41, 0.41};
+    body_t *spring = make_box(ALLEY_SPEC.x - 5.0, SPRING_HEIGHT,
+        spring_color, 1);
     vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y +
         BALL_HEIGHT - (ALLEY_SPEC.x / 2 - BALL_ERROR) - (SPRING_HEIGHT/ 2) - SPRING_SPACE};
     body_set_centroid(spring, spring_start_pos);
+    scene_add_body(scene, spring);
 
+    create_physics_collision(scene, 1.5, ball, spring);
 }
 
 void make_bumpers(scene_t *scene){
@@ -302,13 +320,13 @@ void make_bumpers(scene_t *scene){
     }
 
     body_t *black_hole = make_circle(bumper_radius, 0, 2 * M_PI, BLACK, INFINITY, 0);
-    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    body_set_centroid(black_hole, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     scene_add_body(scene, black_hole);
     create_physics_collision(scene, BUMPER_COLLISION, ball, black_hole);
     create_collision(scene, ball, black_hole, (collision_handler_t) restart_bumper, scene, NULL);
 
     body_t *gain_life = make_circle(bumper_radius, 0, 2 * M_PI, SWINGER_COLOR, INFINITY, 0);
-    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x + (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
+    body_set_centroid(gain_life, (vector_t) {CONE_POINT.x - (0.55 * delta_x), alley_top + 0.69 * WALL_HEIGHT.y});
     scene_add_body(scene, gain_life);
     create_physics_collision(scene, BUMPER_COLLISION, ball, gain_life);
     create_collision(scene, ball, gain_life, (collision_handler_t) extra_life, scene, NULL);
@@ -324,6 +342,10 @@ void spring_bounds(scene_t *scene){
     body_t *ball = get_player(scene);
     vector_t v = body_get_centroid(spring);
     double thickness = 13.0;
+    if (!added_grav && !flung){
+        body_set_velocity(ball, VEC_ZERO);
+    }
+
     if (v.y < SEGUEWAY_LEFT_SPEC.y + thickness){
         vector_t alley_bottom = (vector_t) {ALLEY_POINT.x, SEGUEWAY_LEFT_SPEC.y + thickness};
         body_set_centroid(spring, alley_bottom);
@@ -331,10 +353,11 @@ void spring_bounds(scene_t *scene){
     else if (v.y >= ALLEY_POINT.y + BALL_HEIGHT && flung == true){
         body_set_velocity(spring, VEC_ZERO);
         if (added_grav == false){
+            printf("ADDING GRAVITY ----------------------\n");
             added_grav = true;
             // Gravity box !
             double R = sqrt(G * M / g);
-            body_t *grav = make_circle(5.0, 0.0, 2 * M_PI, BLACK, M, 0);
+            body_t *grav = make_circle(5.0, 0.0, 2 * M_PI, BLACK, M, 2);
             vector_t gravity_center = {.x = MAX_X / 2, .y = -R};
             body_set_centroid(grav, gravity_center);
             scene_add_body(scene, grav);
@@ -343,7 +366,7 @@ void spring_bounds(scene_t *scene){
         }
         else if (added_grav == true){
             vector_t temp_v = body_get_velocity(ball);
-            temp_v.y -= 2.0;
+            temp_v.y -= 1.0;
             body_set_velocity(ball, temp_v);
         }
     }
@@ -488,10 +511,7 @@ int main(){
         body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-        printf("SCORE: %f\n", score);
-        printf("LIVES: %d\n", lives);
-        
-        sdl_render_text((vector_t) {300, 200}, "AMY PHAM", (rgb_color_t) {0, 0, 0});
+        //        sdl_render_text((vector_t) {300, 200}, "AMY PHAM", (rgb_color_t) {0, 0, 0});
         //   check_accelerator(ball);
 
 

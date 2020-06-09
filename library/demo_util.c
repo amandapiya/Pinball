@@ -40,9 +40,9 @@ body_t *make_box(double width, double height, rgb_color_t color, int spring){
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     double mass = 200.0;
     if (spring == 1){
-        *aux = (body_aux_t){false, true, false};
+        *aux = (body_aux_t){false, true, false, false};
     }else{
-        *aux = (body_aux_t) {false, false, false};
+        *aux = (body_aux_t) {false, false, false, false};
         mass = INFINITY;
     }
     return body_init_with_info(rect, mass, color, aux, free);
@@ -64,7 +64,7 @@ body_t *make_trapezoid(double width, double height, double spacing, double slope
     list_add(rect, v);
 
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = (body_aux_t){false, false, false};
+    *aux = (body_aux_t){false, false, false, false};
     return body_init_with_info(rect, INFINITY, color, aux, free);
 }
 
@@ -89,9 +89,13 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t colo
     }
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     if (player == 1){
-        *aux = (body_aux_t){true, false, false};
-    }else{
-        *aux = (body_aux_t) {false, false, false};
+        *aux = (body_aux_t){true, false, false, false};
+     }
+    else if (player == 2){ // is earth
+        *aux = (body_aux_t) {false, false, false, true};
+    }
+    else{
+        *aux = (body_aux_t) {false, false, false, false};
     }
     return body_init_with_info(points, mass, color, aux, free);
 }
@@ -99,7 +103,7 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t colo
 body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
     vector_t center = VEC_ZERO;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = (body_aux_t){false, false, true};
+    *aux = (body_aux_t){false, false, true, false};
     list_t *vertices = list_init(1, free);
     double angle_between_vertices = M_PI/(num_arms);
     double theta = 0;
@@ -125,7 +129,7 @@ body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
 
 body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t color){
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = (body_aux_t){false, false, true};
+    *aux = (body_aux_t){false, false, true, false};
 
        	list_t *vertices = list_init(1, free);
     vector_t *v1 = malloc(sizeof(*v1));

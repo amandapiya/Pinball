@@ -7,6 +7,7 @@ typedef struct {
     bool is_player;
     bool is_spring;
     bool is_bumper;
+    bool is_earth;
 } body_aux_t;
 
 extern const body_aux_t PROP;
