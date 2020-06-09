@@ -21,6 +21,12 @@ const double TRAP_SCALE = 1.2;
 const double EPSILON = 0.001;
 const double ANGLE_BETWEEN_POINTS = 0.01;
 
+const body_aux_t PLAYER_AUX = {true, false, false, false};    //TFFF
+const body_aux_t GENERIC_AUX = {false, false, false, false};  //FFFF
+const body_aux_t SPRING_AUX = {false, true, false, false};    //FTFF
+const body_aux_t SPECIAL_AUX = {false, false, true, false};   //FFTF
+const body_aux_t EARTH_AUX = {false, false, false, true};     //FFFT
+
 body_t *make_box(double width, double height, rgb_color_t color, int spring){
     vector_t centroid = VEC_ZERO;
     vector_t half_shape = {width/2, height/2};
@@ -40,9 +46,9 @@ body_t *make_box(double width, double height, rgb_color_t color, int spring){
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     double mass = 200.0;
     if (spring == 1){
-        *aux = (body_aux_t){false, true, false, false};
+        *aux = SPRING_AUX;
     }else{
-        *aux = (body_aux_t) {false, false, false, false};
+        *aux = GENERIC_AUX;
         mass = INFINITY;
     }
     return body_init_with_info(rect, mass, color, aux, free);
@@ -64,7 +70,7 @@ body_t *make_trapezoid(double width, double height, double spacing, double slope
     list_add(rect, v);
 
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = (body_aux_t){false, false, false, false};
+    *aux = GENERIC_AUX;
     return body_init_with_info(rect, INFINITY, color, aux, free);
 }
 
@@ -89,13 +95,13 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t colo
     }
     body_aux_t *aux = malloc(sizeof(body_aux_t));
     if (player == 1){
-        *aux = (body_aux_t){true, false, false, false};
+        *aux = PLAYER_AUX;
      }
-    else if (player == 2){ // is earth
-        *aux = (body_aux_t) {false, false, false, true};
+    else if (player == 2){
+        *aux = EARTH_AUX;
     }
     else{
-        *aux = (body_aux_t) {false, false, false, false};
+        *aux = GENERIC_AUX;
     }
     return body_init_with_info(points, mass, color, aux, free);
 }
@@ -103,7 +109,7 @@ body_t *make_circle(size_t rad, double min_rad, double max_rad, rgb_color_t colo
 body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
     vector_t center = VEC_ZERO;
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = (body_aux_t){false, false, true, false};
+    *aux = SPECIAL_AUX;
     list_t *vertices = list_init(1, free);
     double angle_between_vertices = M_PI/(num_arms);
     double theta = 0;
@@ -129,9 +135,8 @@ body_t *make_star(size_t num_arms, size_t rad, rgb_color_t color){
 
 body_t *make_accelerator(double rad, double height, vector_t center, rgb_color_t color){
     body_aux_t *aux = malloc(sizeof(body_aux_t));
-    *aux = (body_aux_t){false, false, true, false};
-
-       	list_t *vertices = list_init(1, free);
+    *aux = SPECIAL_AUX;
+   	list_t *vertices = list_init(1, free);
     vector_t *v1 = malloc(sizeof(*v1));
     *v1 = (vector_t) {center.x, center.y};
     list_add(vertices, v1);
