@@ -503,7 +503,7 @@ void check_star(scene_t *scene){
         star = scene_get_body(scene, i);
         if(body_get_rotation(star) > 0) {
             double x = polygon_centroid(body_get_shape(star)).x;
-            if (x > 770 || x < 120){
+            if (x > 770 || x < 220){
                 body_set_velocity(star,(vector_t){-1 * body_get_velocity(star).x, 0});
             }
             return;
