@@ -281,12 +281,10 @@ void points(body_t *body1, body_t *body2, vector_t axis, void *aux){
     score += aux_get_constant(aux);
 }
 
-void extra_life(scene_t *scene1, body_t *ball, body_t *bumper, vector_t axis, void *aux){
+void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     lives += 1;
 
     if (body_is_removed(bumper)) {
-      body_t *bridge = get_bridge(scene1);
-      body_remove(bridge);
       return;
     }
     body_remove(bumper);
