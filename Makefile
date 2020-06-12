@@ -16,7 +16,7 @@ LIB_MATH = -lm
 LIBS = $(LIB_MATH) -lSDL2 -lSDL2_gfx -lSDL2_ttf
 
 # List of demo programs
-DEMOS = pinball swing
+DEMOS = pinball 
 # List of C files in "libraries" that we provide
 STAFF_LIBS = test_util demo_util sdl_wrapper
 # List of C files in "libraries" that you will write

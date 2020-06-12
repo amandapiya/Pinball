@@ -117,6 +117,7 @@ bool hit_wall = false;
 bool added_grav = false;
 int lives = 3;
 int score = 0;
+scene_t *scene = NULL;
 
 body_t *get_player(scene_t *scene){
     for (size_t i = 0; i < scene_bodies(scene); i++){
@@ -187,15 +188,13 @@ void show_lives(scene_t *scene){
 }
 
 void make_score_template(scene_t *scene){
-    // Sets up 4 boxes
-    for (int i = 0; i < CORNER_DELTA; i++){
-        body_t *box = make_box(BOX_SPEC.x, BOX_SPEC.y, BLACK, 0);
-        body_t *inner_box = make_box(BOX_SPEC.x - SPACING_BOXES, BOX_SPEC.y - SPACING_BOXES, INNER_COLOR, 0);
-        body_set_centroid(box, (vector_t) {BOX_POINT.x, BOX_POINT.y - i * (SPACING_BOX_GAP + BOX_SPEC.y)});
-        body_set_centroid(inner_box, (vector_t) {BOX_POINT.x, BOX_POINT.y - i * (SPACING_BOX_GAP + BOX_SPEC.y)});
-        scene_add_body(scene, box);
-        scene_add_body(scene, inner_box);
-    }
+    // Sets up 1 boxes (used to be 4 boxes)
+    body_t *box = make_box(BOX_SPEC.x, BOX_SPEC.y, BLACK, 0);
+    body_t *inner_box = make_box(BOX_SPEC.x - SPACING_BOXES, BOX_SPEC.y - SPACING_BOXES, INNER_COLOR, 0);
+    body_set_centroid(box, (vector_t) {BOX_POINT.x, BOX_POINT.y});
+    body_set_centroid(inner_box, (vector_t) {BOX_POINT.x, BOX_POINT.y});
+    scene_add_body(scene, box);
+    scene_add_body(scene, inner_box);
 }
 
 void make_pinball_border(scene_t *scene){
@@ -304,8 +303,11 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 
 // no lives lost; ball just restarts on the spring
 void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
-    if (body_is_removed(bumper))
-    return;
+    body_t *bridge = get_bridge(scene);
+    body_remove(bridge);
+    if (body_is_removed(bumper)){
+          return;
+    }
     flung = false;
     added_grav = false;
 
@@ -589,7 +591,7 @@ bool check_gate(scene_t *scene, body_t *ball){
 
 int main(){
     sdl_init((vector_t){MIN_XY, MIN_XY}, (vector_t){MAX_X, MAX_Y});
-    scene_t *scene = scene_init();
+    scene = scene_init();
     reset_game(scene);
 
     list_t *swingers = list_init(1, (free_func_t)swinger_free);
@@ -633,10 +635,10 @@ int main(){
 
             // TEXT STUFF
             sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - (SPRING_SPACE - 1) * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, TEXT_SPACE, "Lives:", BLACK);
-            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, TEXT_SPACE, "Points:", BLACK);
+            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, "Points:", BLACK);
             char print_score[ARR_SIZE];
             sprintf(print_score, "%d", score);
-            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, TEXT_SPACE, print_score, BLACK);
+            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, print_score, BLACK);
 
             sdl_render_text((vector_t) {SPRING_SPACE, TEXT_DIST}, TEXT_SPACE, "Level: ", BLACK);
             char level[ARR_SIZE];
@@ -656,6 +658,7 @@ int main(){
 
         if (lives <= 0){
             printf("GAME OVER\n");
+            break;
         }
 
         if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
