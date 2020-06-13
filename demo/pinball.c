@@ -188,7 +188,7 @@ void show_lives(scene_t *scene){
 }
 
 void make_score_template(scene_t *scene){
-    // Sets up 1 boxes (used to be 4 boxes)
+    // Sets up lives remaining box
     body_t *box = make_box(BOX_SPEC.x, BOX_SPEC.y, BLACK, 0);
     body_t *inner_box = make_box(BOX_SPEC.x - SPACING_BOXES, BOX_SPEC.y - SPACING_BOXES, INNER_COLOR, 0);
     body_set_centroid(box, (vector_t) {BOX_POINT.x, BOX_POINT.y});
@@ -201,7 +201,6 @@ void make_pinball_border(scene_t *scene){
     body_t *ball = get_player(scene);
     list_t *pinball_border = list_init(1, (free_func_t) body_free);
 
-    // Sets up pinball border
     body_t *border1 = make_box(SPACING, BOARD_SPEC.y, BLACK, 0);
     body_t *border2 = make_box(BOARD_SPEC.x, SPACING, BLACK, 0);
     body_t *border3 = make_box(SPACING, BOARD_SPEC.y, BLACK, 0);
@@ -215,7 +214,6 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, border3);
     list_add(pinball_border, border4);
 
-    // Sets up ball alley
     double alley_top = ALLEY_POINT.y + ALLEY_SPEC.y/2;
     body_t *alley1 = make_box(SPACING, ALLEY_SPEC.y, BLACK, 0);
     body_t *alley2 = make_box(ALLEY_SPEC.x, SPACING, BLACK, 0);
@@ -227,19 +225,16 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, alley2);
     list_add(pinball_border, alley3);
 
-    // Sets up walls on top of alley
     body_t *alley5 = make_box(SPACING, ALLEY_WALL_SPEC.y, BLACK, 0);
     body_set_centroid(alley5, (vector_t) {ALLEY_POINT.x + ALLEY_SPEC.x/2, alley_top + ALLEY_WALL_SPEC.y/2});
     list_add(pinball_border, alley5);
 
-    // Sets up segueway
     body_t *bridge = make_box(BRIDGE_WIDTH, SPACING, BLACK, 0);
     body_set_centroid(bridge, (vector_t) {RIGHT_WALL_POINT.x + ALLEY_SPEC.x/2 - 1.4*SPACING, alley_top});
     list_add(pinball_border, bridge);
 
     alley_top += ALLEY_WALL_SPEC.y;
 
-    // Sets up outer walls
     body_t *wall_left = make_box(SPACING, WALL_HEIGHT.x, BLACK, 0);
     body_t *wall_right = make_box(SPACING, WALL_HEIGHT.y, BLACK, 0);
     body_set_centroid(wall_left, LEFT_WALL_POINT);
@@ -247,7 +242,6 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, wall_left);
     list_add(pinball_border, wall_right);
 
-    // Sets up corner guards
     body_t *corner_left = make_trapezoid(CORNER_SPEC.x, CORNER_SPEC.y, SPACING, 1, BLACK, 1);
     body_t *corner_right = make_trapezoid(CORNER_SPEC.x, CORNER_SPEC.y, SPACING, -1, BLACK, 1);
     body_set_centroid(corner_left, (vector_t) {LEFT_WALL_POINT.x - CORNER_DELTA, alley_top});
@@ -255,12 +249,10 @@ void make_pinball_border(scene_t *scene){
     list_add(pinball_border, corner_left);
     list_add(pinball_border, corner_right);
 
-    // Sets up roof
     body_t *roof = make_box(ROOF_WIDTH, SPACING, BLACK, 0);
     body_set_centroid(roof, (vector_t) {BOARD_POINT.x + BOARD_SPEC.x/2 + ROOF_SPACING * SPACING, alley_top + CORNER_SPEC.y - SPACING/2});
     list_add(pinball_border, roof);
 
-    // Sets up cone bottom
     body_t *cone1 = make_trapezoid(CONE_SPEC.x, CONE_SPEC.y, SPACING, 1, BLACK, 1);
     body_t *cone2 = make_trapezoid(CONE_SPEC.x, CONE_SPEC.y, SPACING, -1, BLACK, 1);
     body_set_centroid(cone1, (vector_t) {CONE_POINT.x + LOSING_SPEC.x/2 - SPACING, CONE_POINT.y});
@@ -275,7 +267,7 @@ void make_pinball_border(scene_t *scene){
     }
 }
 
-/*   || BUMPER STUFF || */
+/*   || Bumper Code || */
 void points(body_t *body1, body_t *body2, vector_t axis, void *aux){
     score += aux_get_constant(aux);
 }
@@ -301,7 +293,7 @@ void extra_life(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
 }
 
-// no lives lost; ball just restarts on the spring
+// If no lives lost; ball just restarts on the spring
 void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     scene_t *scene = aux;
     body_t *bridge = get_bridge(scene);
@@ -315,7 +307,7 @@ void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
 
     body_remove(bumper);
 
-    // bumper reset
+    // Bumper reset
     double bumper_radius = (ALLEY_SPEC.x / BUMPER_RAD - BALL_ERROR) / SWINGER_ELASTICITY;
     body_set_centroid(ball, vec_add(body_get_centroid(ball),
         vec_multiply(EXTRA_LIFE_VELOCITY, body_get_velocity(ball))));
@@ -326,7 +318,7 @@ void restart_bumper(body_t *ball, body_t *bumper, vector_t axis, void *aux){
     aux_t *bumper_aux = aux_init(REG_POINTS, ball, b);
     create_collision(scene, ball, b, (collision_handler_t) points, (void*) bumper_aux, (free_func_t) aux_free);
 
-    // ball and spring reset
+    // Ball and spring reset
     body_t *earth = get_earth(scene);
     body_remove(earth);
 
@@ -501,7 +493,7 @@ void reset_game(scene_t *scene){
         body_remove(scene_get_body(scene, i));
     }
 
-    // add accelerators
+    // Add accelerators
     body_t *acc1 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y}, ACC_ONE);
     scene_add_body(scene, acc1);
     body_t *acc2 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + BALL_ERROR}, ACC_TWO);
@@ -509,12 +501,12 @@ void reset_game(scene_t *scene){
     body_t *acc3 = make_accelerator(ACC_WIDTH, ACC_HEIGHT, (vector_t){MID_X, ACC_POS_Y + 2 * BALL_ERROR}, ACC_THREE);
     scene_add_body(scene, acc3);
 
-    // add ball
+    // Add ball
     body_t *ball = make_circle(ALLEY_SPEC.x / 2 - BALL_ERROR, 0, 2 * M_PI, BALL_COLOR, BALL_MASS, 1.0);
     body_set_centroid(ball, vec_add(ALLEY_POINT, (vector_t) {0, BALL_HEIGHT}));
     scene_add_body(scene, ball);
 
-    // add spring
+    // Add spring
     body_t *spring = make_box(ALLEY_SPEC.x - SPRING_SPACE, SPRING_HEIGHT, SPRING_COLOR, 1);
     vector_t spring_start_pos = (vector_t) {ALLEY_POINT.x, ALLEY_POINT.y +
         BALL_HEIGHT - (ALLEY_SPEC.x / 2 - BALL_ERROR) - (SPRING_HEIGHT/ 2) - SPRING_SPACE};
@@ -535,7 +527,7 @@ void reset_game(scene_t *scene){
 }
 
 void check_accelerator(scene_t *scene, body_t *ball, double total_time){
-    // update accelerator colors
+    // Update accelerator colors
     int acc_num = 0;
     for (size_t i = 0; i < scene_bodies(scene); i++){
         body_t *acc = scene_get_body(scene, i);
@@ -555,7 +547,7 @@ void check_accelerator(scene_t *scene, body_t *ball, double total_time){
         }
     }
 
-    // accelerate ball if it is in accelerator region
+    // Accelerate ball when it enters the accelerator region
     if (body_get_velocity(ball).y > 0){
         vector_t c = polygon_centroid(body_get_shape(ball));
         if ((c.x > MID_X - ACC_WIDTH && c.x < MID_X + ACC_WIDTH)
@@ -616,14 +608,14 @@ int main(){
             gate = check_gate(scene, ball);
         }
         update_star(scene, total_time);
-        // check if life lost
+        // Check if life lost
         if (get_player(scene) == NULL){
             lives--;
             reset_game(scene);
             gate = false;
         }
         else{
-            // BALL STUFF
+            // Ball Graphics
             check_accelerator(scene, ball, total_time);
             spring_bounds(scene);
             body_set_color(ball, phase_color(BALL_COLOR, total_time));
@@ -632,7 +624,7 @@ int main(){
             swinger_tick(s1, dt);
             swinger_tick(s2, dt);
 
-            // TEXT STUFF
+            // Text Graphics
             sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - (SPRING_SPACE - 1) * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, TEXT_SPACE, "Lives:", BLACK);
             sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, "Points:", BLACK);
             char print_score[ARR_SIZE];
@@ -644,17 +636,12 @@ int main(){
             sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
             sdl_render_text((vector_t) {SPRING_SPACE, TEXT_SPACE + TEXT_DIST}, TEXT_SPACE, level, BLACK);
 
-            // TA Images
-            //double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-            //sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
-            //sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
+            // Images
+            double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
+            sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
+            sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
         }
-
-        // TA Images
-        // double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-        //sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
-        //sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
-
+        
         if (lives <= 0){
             printf("GAME OVER\n");
             break;
