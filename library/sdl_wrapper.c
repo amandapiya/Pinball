@@ -240,7 +240,7 @@ void sdl_render_image(vector_t position){
 
     vector_t window_center = get_window_center();
 
-    SDL_Surface *image = SDL_LoadBMP("blank-original.bmp");
+    SDL_Surface *image = SDL_LoadBMP("fonts/blank-original.bmp");
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
 
     position =  get_window_position(position, window_center);
@@ -275,13 +275,14 @@ void sdl_render_scene(scene_t *scene, list_t *swlist){
     curr_scene = scene;
     curr_swing1 = list_get(swlist, 0);
     curr_swing2 = list_get(swlist, 1);
-
+    
     for (size_t i = 0; i < scene_bodies(scene); i++){
         body_t *b = scene_get_body(scene, i);
         if(((body_aux_t*) body_get_info(b))->is_spring) {
             curr_spring = b;
         }
     }
+
     sdl_show();
 }
 

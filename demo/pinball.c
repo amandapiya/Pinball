@@ -100,11 +100,11 @@ const double SWINGER_LENGTH = 110;
 const double LEFT_SWINGER_ANG = 11*M_PI/6;
 const double RIGHT_SWINGER_ANG = 7*M_PI/6;
 const rgb_color_t SWINGER_COLOR = {1, 0, 0};
-const double BASE_MOMENTUM = 5;
-const double ACC_WIDTH = 70;
-const double ACC_HEIGHT = 20;
-const double ACC_POS_Y = 250;
-const double DELTA_CONSTANT = 43;
+const double BASE_MOMENTUM = 5.3;
+const double ACC_WIDTH = 70.0;
+const double ACC_HEIGHT = 20.0;
+const double ACC_POS_Y = 250.0;
+const double DELTA_CONSTANT = 43.0;
 
 // POINTS STUFF
 const int REG_POINTS = 500.0;
@@ -116,7 +116,7 @@ const int ARR_SIZE = 30;
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false;
-int lives = 0;
+int lives = 3;
 int score = 0;
 bool gate = false;
 
@@ -466,20 +466,20 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
                 right_swinger(held_time, key_handler_aux);
                 break;
             case (' '):
-                if (!flung && spring != NULL){
+                if (!flung && lives > 0){
                     spring_move(held_time, spring);
                 }
                 break;
         }
         double time_divisions = 11;
-        if (spring != NULL){
+        if (lives > 0){
             body_tick(spring, held_time / time_divisions);
         }
     }
     else if (type == KEY_RELEASED){
         switch (key) {
             case (' '):
-                if (!flung){
+                if (!flung && lives > 0){
                     flung = true;
                     spring_fling(key_handler_aux);
                 }
@@ -609,14 +609,16 @@ int main(){
             for (size_t i = 0; i < scene_bodies(scene); i++){
                 body_remove(scene_get_body(scene, i));
             }
-            
+            swinger_set_color(s1, INNER_COLOR);
+            swinger_set_color(s2, INNER_COLOR);
             sdl_render_text((vector_t) {MAX_X / 2 - 300, MAX_Y / 2 - 200}, 2 * TEXT_DIST, "GAME OVER", BLACK);
             char final_score[ARR_SIZE];
             strcpy(final_score, "SCORE: ");
             char print_score[ARR_SIZE];
             sprintf(print_score, "%d", score);
             strcat(final_score, print_score);
-            sdl_render_text((vector_t) {MAX_X / 2, MAX_Y - 300 - TEXT_DIST}, TEXT_DIST, final_score, BLACK); 
+            sdl_render_text((vector_t) {MAX_X / 2 - 175, MAX_Y - 400}, TEXT_DIST, final_score, BLACK); 
+            sdl_render_image((vector_t) {MAX_X / 2 - 300, MAX_Y - 400});
         }
         else{
             body_t *ball = get_player(scene);
@@ -671,6 +673,7 @@ int main(){
     swinger_free(s2);
     free(sw1counter);
     free(sw2counter);
+    free(swingers);
 
     scene_free(scene);
   }
