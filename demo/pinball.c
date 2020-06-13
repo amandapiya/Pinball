@@ -609,7 +609,8 @@ int main(){
             for (size_t i = 0; i < scene_bodies(scene); i++){
                 body_remove(scene_get_body(scene, i));
             }
-            
+            swinger_set_color(s1, INNER_COLOR));
+            swinger_set_color(s2, INNER_COLOR));
             sdl_render_text((vector_t) {MAX_X / 2 - 216, MAX_Y - 200}, 2 * TEXT_DIST, "GAME OVER", BLACK);
             char final_score[ARR_SIZE];
             strcpy(final_score, "SCORE: ");
@@ -671,6 +672,7 @@ int main(){
     swinger_free(s2);
     free(sw1counter);
     free(sw2counter);
+    free(swingers);
 
     scene_free(scene);
   }
