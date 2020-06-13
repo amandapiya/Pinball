@@ -116,7 +116,7 @@ const int ARR_SIZE = 30;
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false;
-int lives = 1;
+int lives = 0;
 int score = 0;
 bool gate = false;
 
@@ -610,7 +610,7 @@ int main(){
                 body_remove(scene_get_body(scene, i));
             }
             
-            sdl_render_text((vector_t) {MAX_X / 2 - 216, MAX_Y - 200}, 2 * TEXT_DIST, "GAME OVER", BLACK);
+            sdl_render_text((vector_t) {MAX_X / 2 - 300, MAX_Y / 2 - 200}, 2 * TEXT_DIST, "GAME OVER", BLACK);
             char final_score[ARR_SIZE];
             strcpy(final_score, "SCORE: ");
             char print_score[ARR_SIZE];
