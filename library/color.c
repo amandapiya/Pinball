@@ -28,13 +28,13 @@ rgb_color_t phase_color(rgb_color_t og_color, double time_passed){
     }
     else {
         new_g = 1 - fabs(cos(time_passed));
-    }
+    }/*
     if (new_b < 1){ // R = 0
         new_b = fabs(cos(time_passed));
     }
     else {
         new_b = 1 - fabs(cos(time_passed));
-    }
+    }*/
     return (rgb_color_t){new_r, new_g, new_b};
 }
 
