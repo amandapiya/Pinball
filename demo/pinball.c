@@ -78,6 +78,7 @@ const double BALL_HEIGHT = 65.0;
 const double LIFE_SPACING = 15.0;
 const double EXTRA_LIFE_VELOCITY = 0.15;
 const double TOP_BUMPER = 35;
+const double ACC_CENTER_X = MID_X - 1.4 * BALL_ERROR;
 
 // Spring constants
 const double SPRING_HEIGHT = 10.0;
@@ -636,10 +637,8 @@ int main(){
             sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
             sdl_render_text((vector_t) {SPRING_SPACE, TEXT_SPACE + TEXT_DIST}, TEXT_SPACE, level, BLACK);
 
-            // Images
-            double bumper_radius = ALLEY_SPEC.x / 1.8 - BALL_ERROR;
-            sdl_render_image((vector_t) {300, 7.5 * bumper_radius});
-            sdl_render_image((vector_t) {BOX_POINT.x, BOX_POINT.y - 3 *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST});
+            // Professor Image
+            sdl_render_image((vector_t) {ACC_CENTER_X, ACC_POS_Y + 2 * BALL_ERROR});
         }
         
         if (lives <= 0){
