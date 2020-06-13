@@ -233,7 +233,7 @@ void sdl_render_text(vector_t position, int font_size, char* text, rgb_color_t c
     
     TTF_CloseFont(font);
 }
-/*
+
 void sdl_render_image(vector_t position){
     assert(position.x >= 0 && position.x <= WINDOW_WIDTH);
     assert(position.y >= 0 && position.y <= WINDOW_HEIGHT);
@@ -251,7 +251,7 @@ void sdl_render_image(vector_t position){
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(image);
 }
-*/
+
 void sdl_show(void) {
     SDL_RenderPresent(renderer);
 }
