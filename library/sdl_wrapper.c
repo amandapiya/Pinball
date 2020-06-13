@@ -265,6 +265,7 @@ void sdl_render_scene(scene_t *scene, list_t *swlist){
         sdl_draw_polygon(shape, body_get_color(body));
         list_free(shape);
     }
+    
     for (size_t j = 0; j < list_size(swlist); j++){
         swinger_t *s = list_get(swlist, j);
         list_t *shape = swinger_get_shape(s);

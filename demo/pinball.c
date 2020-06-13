@@ -112,11 +112,11 @@ const int LEVEL_CHANGER_SCORE = 5000;
 const double TEXT_DIST = 45.0;
 const double BASE_LIVES = 3;
 const double TEXT_SPACE = 24;
-const int ARR_SIZE = 10;
+const int ARR_SIZE = 30;
 bool flung = false;
 bool hit_wall = false;
 bool added_grav = false;
-int lives = 3;
+int lives = 1;
 int score = 0;
 bool gate = false;
 
@@ -466,13 +466,15 @@ void on_key(char key, key_event_type_t type, double held_time, void *key_handler
                 right_swinger(held_time, key_handler_aux);
                 break;
             case (' '):
-                if (!flung){
+                if (!flung && spring != NULL){
                     spring_move(held_time, spring);
                 }
                 break;
         }
         double time_divisions = 11;
-        body_tick(spring, held_time / time_divisions);
+        if (spring != NULL){
+            body_tick(spring, held_time / time_divisions);
+        }
     }
     else if (type == KEY_RELEASED){
         switch (key) {
@@ -601,62 +603,74 @@ int main(){
 
     double total_time = 0.0;
     while (!sdl_is_done()){
-        body_t *ball = get_player(scene);
         double dt = time_since_last_tick();
         total_time += dt;
-
-        if (!gate){
-            gate = check_gate(scene, ball);
-        }
-        update_star(scene, total_time);
-        // Check if life lost
-        if (get_player(scene) == NULL){
-            lives--;
-            reset_game(scene);
-            gate = false;
-        }
-        else{
-            // Ball Graphics
-            check_accelerator(scene, ball, total_time);
-            spring_bounds(scene);
-            body_set_color(ball, phase_color(BALL_COLOR, total_time));
-            temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
-            temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
-            swinger_tick(s1, dt);
-            swinger_tick(s2, dt);
-
-            // Text Graphics
-            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - (SPRING_SPACE - 1) * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, TEXT_SPACE, "Lives:", BLACK);
-            sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, "Points:", BLACK);
+        if (lives <= 0){
+            for (size_t i = 0; i < scene_bodies(scene); i++){
+                body_remove(scene_get_body(scene, i));
+            }
+            
+            sdl_render_text((vector_t) {MAX_X / 2 - 216, MAX_Y - 200}, 2 * TEXT_DIST, "GAME OVER", BLACK);
+            char final_score[ARR_SIZE];
+            strcpy(final_score, "SCORE: ");
             char print_score[ARR_SIZE];
             sprintf(print_score, "%d", score);
-            sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, print_score, BLACK);
-
-            sdl_render_text((vector_t) {SPRING_SPACE, TEXT_DIST}, TEXT_SPACE, "Level: ", BLACK);
-            char level[ARR_SIZE];
-            sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
-            sdl_render_text((vector_t) {SPRING_SPACE, TEXT_SPACE + TEXT_DIST}, TEXT_SPACE, level, BLACK);
-
-            // Professor Image
-            sdl_render_image((vector_t) {ACC_CENTER_X, ACC_POS_Y + 2 * BALL_ERROR});
+            strcat(final_score, print_score);
+            sdl_render_text((vector_t) {MAX_X / 2, MAX_Y - 300 - TEXT_DIST}, TEXT_DIST, final_score, BLACK); 
         }
+        else{
+            body_t *ball = get_player(scene);
+
+            if (!gate){
+                gate = check_gate(scene, ball);
+            }
+            update_star(scene, total_time);
+            // Check if life lost
+            if (get_player(scene) == NULL){
+                lives--;
+                reset_game(scene);
+                gate = false;
+            }
+            else{
+                // Ball Graphics
+                check_accelerator(scene, ball, total_time);
+                spring_bounds(scene);
+                body_set_color(ball, phase_color(BALL_COLOR, total_time));
+                temp_swinger_collision(scene, SWINGER_ELASTICITY, s1, ball, sw1counter);
+                temp_swinger_collision(scene, SWINGER_ELASTICITY, s2, ball, sw2counter);
+                swinger_tick(s1, dt);
+                swinger_tick(s2, dt);
+
+                // Text Graphics
+                sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - (SPRING_SPACE - 1) * (SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + TEXT_DIST}, TEXT_SPACE, "Lives:", BLACK);
+                sdl_render_text((vector_t) {BOX_POINT.x - BOX_SPEC.x / 2, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, "Points:", BLACK);
+                char print_score[ARR_SIZE];
+                sprintf(print_score, "%d", score);
+                sdl_render_text((vector_t) {BOX_POINT.x, BOX_POINT.y - BASE_LIVES *(SPACING_BOX_GAP + BOX_SPEC.y) + BOX_SPEC.y / 2 + 2 * TEXT_DIST}, TEXT_SPACE, print_score, BLACK);
+
+                sdl_render_text((vector_t) {SPRING_SPACE, TEXT_DIST}, TEXT_SPACE, "Level: ", BLACK);
+                char level[ARR_SIZE];
+                sprintf(level, "%d", score / LEVEL_CHANGER_SCORE);
+                sdl_render_text((vector_t) {SPRING_SPACE, TEXT_SPACE + TEXT_DIST}, TEXT_SPACE, level, BLACK);
+
+                // Professor Image
+                sdl_render_image((vector_t) {ACC_CENTER_X, ACC_POS_Y + 2 * BALL_ERROR});
+            }
+        } 
         
-        if (lives <= 0){
-            printf("GAME OVER\n");
-            break;
-        }
+        scene_tick(scene, dt);
+        sdl_render_scene(scene, swingers);
+        sdl_clear();
 
         if (score % LEVEL_CHANGER_SCORE == 0 && score / LEVEL_CHANGER_SCORE != 0 && score != LEVEL_CHANGER_SCORE){
             velocity_adj = (float) score / LEVEL_CHANGER_SCORE;
         }
-        scene_tick(scene, dt);
-        sdl_render_scene(scene, swingers);
-        sdl_clear();
     }
-
+    
     swinger_free(s1);
     swinger_free(s2);
     free(sw1counter);
     free(sw2counter);
+
     scene_free(scene);
   }
